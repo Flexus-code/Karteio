@@ -3,6 +3,7 @@ import { MotionConfig } from 'framer-motion'
 import { AppShell } from './AppShell'
 import { HomePage } from '@/pages/HomePage'
 import { FoldersPage } from '@/pages/FoldersPage'
+import { DeckPage } from '@/pages/DeckPage'
 import { LearnPage } from '@/pages/LearnPage'
 import { StatsPage } from '@/pages/StatsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
@@ -14,7 +15,9 @@ export function App() {
         <Routes>
           <Route element={<AppShell />}>
             <Route index element={<HomePage />} />
-            <Route path="ordner/*" element={<FoldersPage />} />
+            <Route path="ordner" element={<FoldersPage />} />
+            <Route path="ordner/:folderId" element={<FoldersPage />} />
+            <Route path="stapel/:deckId" element={<DeckPage />} />
             <Route path="lernen" element={<LearnPage />} />
             <Route path="statistik" element={<StatsPage />} />
             <Route path="einstellungen" element={<SettingsPage />} />

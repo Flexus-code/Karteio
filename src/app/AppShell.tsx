@@ -3,6 +3,7 @@ import { useLocation, useOutlet } from 'react-router-dom'
 import { InstallHint } from '@/components/InstallHint'
 import { SplashScreen } from '@/components/SplashScreen'
 import { TabBar } from '@/components/TabBar'
+import { Toaster } from '@/components/Toaster'
 import { UpdatePrompt } from '@/components/UpdatePrompt'
 import { useApplyTheme } from '@/lib/theme'
 
@@ -28,6 +29,7 @@ export function AppShell() {
           </motion.main>
         </AnimatePresence>
         <TabBar />
+        <Toaster />
         <UpdatePrompt />
         <InstallHint />
         <SplashScreen />

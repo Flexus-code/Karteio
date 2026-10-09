@@ -17,7 +17,9 @@ export const TABS: Tab[] = [
 ]
 
 function isActive(tab: Tab, pathname: string) {
-  return tab.to === '/' ? pathname === '/' : pathname.startsWith(tab.to)
+  if (tab.to === '/') return pathname === '/'
+  if (tab.to === '/ordner') return pathname.startsWith('/ordner') || pathname.startsWith('/stapel')
+  return pathname.startsWith(tab.to)
 }
 
 export function TabBar() {
