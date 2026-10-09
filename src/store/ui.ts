@@ -17,9 +17,11 @@ interface UiState {
   theme: ThemeMode
   accent: AccentColor
   installHintDismissed: boolean
+  onboardingDone: boolean
   setTheme: (theme: ThemeMode) => void
   setAccent: (accent: AccentColor) => void
   dismissInstallHint: () => void
+  setOnboardingDone: (done: boolean) => void
 }
 
 /** Kleine UI-Einstellungen, die schon vor dem Laden der Datenbank gebraucht werden (localStorage). */
@@ -29,9 +31,11 @@ export const useUiStore = create<UiState>()(
       theme: 'system',
       accent: 'indigo',
       installHintDismissed: false,
+      onboardingDone: false,
       setTheme: (theme) => set({ theme }),
       setAccent: (accent) => set({ accent }),
       dismissInstallHint: () => set({ installHintDismissed: true }),
+      setOnboardingDone: (onboardingDone) => set({ onboardingDone }),
     }),
     { name: 'karteio-ui' },
   ),

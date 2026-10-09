@@ -5,13 +5,17 @@ import { SplashScreen } from '@/components/SplashScreen'
 import { TabBar } from '@/components/TabBar'
 import { Toaster } from '@/components/Toaster'
 import { UpdatePrompt } from '@/components/UpdatePrompt'
+import { Onboarding } from '@/features/onboarding/Onboarding'
 import { useApplyTheme } from '@/lib/theme'
+import { useUiStore } from '@/store/ui'
 
 /** Rahmen der App: zentrierte Handy-Ansicht, animierter Seiteninhalt, Tab-Bar. */
 export function AppShell() {
   useApplyTheme()
   const location = useLocation()
   const outlet = useOutlet()
+  const onboardingDone = useUiStore((s) => s.onboardingDone)
+  const setOnboardingDone = useUiStore((s) => s.setOnboardingDone)
 
   return (
     <div className="flex h-full justify-center bg-bg">
@@ -31,7 +35,8 @@ export function AppShell() {
         <TabBar />
         <Toaster />
         <UpdatePrompt />
-        <InstallHint />
+        {onboardingDone && <InstallHint />}
+        <AnimatePresence>{!onboardingDone && <Onboarding key="onboarding" onDone={() => setOnboardingDone(true)} />}</AnimatePresence>
         <SplashScreen />
       </div>
     </div>

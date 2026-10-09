@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Check, HardDrive, Info, Palette, ShieldCheck } from 'lucide-react'
+import { BookOpen, Check, ChevronRight, HardDrive, Info, Palette, ShieldCheck } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Card } from '@/components/Card'
 import { PageHeader } from '@/components/PageHeader'
@@ -14,7 +14,7 @@ const THEME_OPTIONS: { value: ThemeMode; label: string }[] = [
 ]
 
 export function SettingsPage() {
-  const { theme, accent, setTheme, setAccent } = useUiStore()
+  const { theme, accent, setTheme, setAccent, setOnboardingDone } = useUiStore()
   const [storage, setStorage] = useState<{ usage: number; quota: number } | null>(null)
   const [persisted, setPersisted] = useState<boolean | null>(null)
 
@@ -87,6 +87,11 @@ export function SettingsPage() {
 
         <Section icon={Info} title="Über">
           <Card className="divide-y divide-line">
+            <button onClick={() => setOnboardingDone(false)} className="flex min-h-12 w-full items-center gap-3 px-4 text-left text-[15px] active:bg-surface-2">
+              <BookOpen size={18} className="text-accent" />
+              <span className="flex-1">Kurzanleitung anzeigen</span>
+              <ChevronRight size={18} className="text-ink-3" />
+            </button>
             <Row label="Version">{__APP_VERSION__}</Row>
             <Row label="Entwickelt von">Felix Böse</Row>
             <Row label="Daten">Lokal, offline</Row>

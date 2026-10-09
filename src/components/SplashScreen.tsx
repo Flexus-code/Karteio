@@ -2,28 +2,71 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
 const APP_NAME = 'Karteio'
-const DURATION_MS = 2300
 
-/** Animierter Startbildschirm beim Öffnen der App. Antippen überspringt ihn. */
-export function SplashScreen() {
+/**
+ * Ablauf: Karte mit „Karteio“ erscheint → Karte dreht sich um → Karte wird wie beim Lernen
+ * weggewischt und nimmt den Startbildschirm mit.
+ */
+type Phase = 'enter' | 'flipOut' | 'flipIn' | 'swipe' | 'done'
+
+// Umdrehen in zwei Hälften (bis zur Kante, Inhalt tauschen, zurück) – zuverlässiger als backface-visibility
+const TIMELINE: [Phase, number][] = [
+  ['flipOut', 1500],
+  ['flipIn', 1760],
+  ['swipe', 2600],
+  ['done', 3150],
+]
+
+interface SplashScreenProps {
+  onFinished?: () => void
+}
+
+export function SplashScreen({ onFinished }: SplashScreenProps) {
   const reduced = useReducedMotion()
-  const [visible, setVisible] = useState(true)
+  const [phase, setPhase] = useState<Phase>('enter')
 
   useEffect(() => {
-    const t = setTimeout(() => setVisible(false), reduced ? 900 : DURATION_MS)
-    return () => clearTimeout(t)
+    if (reduced) {
+      const t = setTimeout(() => setPhase('done'), 900)
+      return () => clearTimeout(t)
+    }
+    const timers = TIMELINE.map(([p, ms]) => setTimeout(() => setPhase(p), ms))
+    return () => timers.forEach(clearTimeout)
   }, [reduced])
+
+  useEffect(() => {
+    if (phase === 'done') onFinished?.()
+  }, [phase, onFinished])
+
+  const showBack = phase === 'flipIn' || phase === 'swipe'
+  const swiping = phase === 'swipe'
+
+  const cardAnimate = swiping
+    ? { opacity: 0, x: 520, y: -60, rotate: 28, scale: 1, rotateY: 0 }
+    : phase === 'flipOut'
+      ? { opacity: 1, x: 0, y: 0, scale: 1.04, rotate: 0, rotateY: 90 }
+      : phase === 'flipIn'
+        ? { opacity: 1, x: 0, y: 0, scale: 1, rotate: 0, rotateY: [-90, 0] }
+        : { opacity: 1, x: 0, y: 0, scale: 1, rotate: 0, rotateY: 0 }
+
+  const cardTransition = swiping
+    ? { duration: 0.55, ease: [0.5, 0, 0.75, 0] as const }
+    : phase === 'flipOut'
+      ? { duration: 0.25, ease: [0.5, 0, 1, 1] as const }
+      : phase === 'flipIn'
+        ? { duration: 0.3, ease: [0, 0, 0.3, 1] as const }
+        : { type: 'spring' as const, stiffness: 160, damping: 18 }
 
   return (
     <AnimatePresence>
-      {visible && (
+      {phase !== 'done' && (
         <motion.div
           key="splash"
           role="presentation"
-          onClick={() => setVisible(false)}
+          onClick={() => setPhase('done')}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden accent-gradient text-white"
-          exit={{ opacity: 0, scale: 1.08, filter: 'blur(6px)' }}
-          transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.35 }}
         >
           {/* Hintergrund-Glows */}
           <motion.div
@@ -37,71 +80,65 @@ export function SplashScreen() {
             transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
           />
 
-          {/* Kartenfächer */}
-          <div className="relative mb-10 h-32 w-44">
-            {[-14, 0, 14].map((rotate, i) => (
+          <div className="relative h-[200px] w-[290px]" style={{ perspective: 1000 }}>
+            {/* Stapel dahinter */}
+            {[2, 1].map((depth) => (
               <motion.div
-                key={rotate}
-                className="absolute inset-0 rounded-[22px] border border-white/40 bg-white shadow-[0_20px_50px_-15px_rgba(0,0,0,0.45)]"
-                style={{ opacity: i === 1 ? 1 : 0.55 }}
-                initial={{ y: 60, rotate: 0, scale: 0.6, opacity: 0 }}
-                animate={{ y: i === 1 ? 0 : 6, rotate, scale: 1, opacity: i === 1 ? 1 : 0.55 }}
-                transition={{ type: 'spring', stiffness: 220, damping: 18, delay: 0.1 + i * 0.08 }}
-              >
-                {i === 1 && (
-                  <div className="flex h-full flex-col justify-center gap-3 px-6">
-                    <motion.div
-                      className="h-3.5 rounded-full bg-accent"
-                      initial={{ width: 0 }}
-                      animate={{ width: '60%' }}
-                      transition={{ delay: 0.55, duration: 0.5, ease: 'easeOut' }}
-                    />
-                    <motion.div
-                      className="h-2.5 rounded-full bg-accent-soft"
-                      initial={{ width: 0 }}
-                      animate={{ width: '85%' }}
-                      transition={{ delay: 0.7, duration: 0.5, ease: 'easeOut' }}
-                    />
-                    <motion.div
-                      className="h-2.5 rounded-full bg-accent-soft"
-                      initial={{ width: 0 }}
-                      animate={{ width: '70%' }}
-                      transition={{ delay: 0.82, duration: 0.5, ease: 'easeOut' }}
-                    />
-                  </div>
-                )}
-              </motion.div>
+                key={depth}
+                className="absolute inset-0 rounded-[28px] bg-white"
+                initial={{ opacity: 0, y: 40, scale: 0.8 }}
+                animate={
+                  swiping
+                    ? { opacity: 0, y: depth * 14, scale: 1 - depth * 0.05, rotate: depth * 3 }
+                    : { opacity: 0.18 * (3 - depth), y: depth * 14, scale: 1 - depth * 0.05, rotate: depth * 3 }
+                }
+                transition={{ type: 'spring', stiffness: 200, damping: 22, delay: swiping ? 0.15 : 0.1 * depth }}
+              />
             ))}
+
+            {/* Hauptkarte */}
+            <motion.div
+              className="absolute inset-0 flex flex-col items-center justify-center rounded-[28px] bg-white px-8 text-center shadow-[0_30px_60px_-20px_rgba(0,0,0,0.5)]"
+              initial={{ opacity: 0, y: 80, scale: 0.7, rotate: -6 }}
+              animate={cardAnimate}
+              transition={cardTransition}
+            >
+              {showBack ? (
+                <>
+                  <span className="mb-2 text-[44px] leading-none">🧠</span>
+                  <p className="text-[19px] font-bold text-[#1c1c28]">Lernen, das hängen bleibt.</p>
+                </>
+              ) : (
+                <>
+                  <h1 aria-label={APP_NAME} className="flex font-display text-[50px] font-extrabold tracking-tight text-accent">
+                    {APP_NAME.split('').map((ch, i) => (
+                      <motion.span
+                        key={i}
+                        aria-hidden
+                        initial={{ opacity: 0, y: 18 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ type: 'spring', stiffness: 320, damping: 20, delay: 0.35 + i * 0.06 }}
+                      >
+                        {ch}
+                      </motion.span>
+                    ))}
+                  </h1>
+                  <motion.div
+                    className="mt-2 h-1.5 rounded-full accent-gradient"
+                    initial={{ width: 0 }}
+                    animate={{ width: 90 }}
+                    transition={{ delay: 0.85, duration: 0.45, ease: 'easeOut' }}
+                  />
+                </>
+              )}
+            </motion.div>
           </div>
 
-          {/* Schriftzug */}
-          <h1 aria-label={APP_NAME} className="flex font-display text-[46px] font-extrabold tracking-tight">
-            {APP_NAME.split('').map((ch, i) => (
-              <motion.span
-                key={i}
-                aria-hidden
-                initial={{ opacity: 0, y: 24, rotateX: -80 }}
-                animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.45 + i * 0.05 }}
-              >
-                {ch}
-              </motion.span>
-            ))}
-          </h1>
           <motion.p
-            className="mt-1 text-[15px] font-medium text-white/80"
+            className="absolute bottom-[calc(var(--safe-bottom)+36px)] text-[13px] tracking-wide text-white/75"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.95, duration: 0.4 }}
-          >
-            Lernen, das hängen bleibt.
-          </motion.p>
-
-          <motion.p
-            className="absolute bottom-[calc(var(--safe-bottom)+36px)] text-[13px] tracking-wide text-white/70"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2, duration: 0.5 }}
+            transition={{ delay: 0.9, duration: 0.5 }}
           >
             by <span className="font-semibold text-white">Felix Böse</span>
           </motion.p>
