@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+    <title>Karteio</title>
+    <meta name="description" content="Karteikarten erstellen, organisieren und mit Spaced Repetition lernen." />
+    <link rel="icon" href="./favicon.ico" sizes="48x48" />
+    <link rel="icon" href="./logo.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon-180x180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Karteio" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#f6f6fb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0b12" media="(prefers-color-scheme: dark)" />
+    <script>
+      // Theme vor dem ersten Rendern setzen (kein Aufblitzen)
+      try {
+        var s = JSON.parse(localStorage.getItem('karteio-ui') || '{}').state || {};
+        var t = s.theme || 'system';
+        var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.classList.toggle('dark', dark);
+        document.documentElement.dataset.accent = s.accent || 'indigo';
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
