@@ -1,4 +1,6 @@
-import { FolderInput, FolderPlus, Layers, Pencil, Trash2, ExternalLink } from 'lucide-react'
+import { Download, ExternalLink, FolderInput, FolderPlus, Layers, Pencil, Share2, Trash2 } from 'lucide-react'
+import { ExportSheet } from '@/features/data/ExportSheet'
+import { ImportSheet } from '@/features/data/ImportSheet'
 import { useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ActionSheet, type ActionItem } from '@/components/ActionSheet'
@@ -26,6 +28,8 @@ export function useItemDialogs(library: Library | undefined, { onTrashed }: Opti
   const [menu, setMenu] = useState<Target | null>(null)
   const [form, setForm] = useState<FormState | null>(null)
   const [move, setMove] = useState<Target | null>(null)
+  const [exportTarget, setExportTarget] = useState<Target | null>(null)
+  const [importTarget, setImportTarget] = useState<{ deckId: Id } | { folderId: Id | null } | null>(null)
 
   const open = (t: Target) => navigate(t.kind === 'folder' ? `/ordner/${t.item.id}` : `/stapel/${t.item.id}`)
 
@@ -82,6 +86,12 @@ export function useItemDialogs(library: Library | undefined, { onTrashed }: Opti
         ]
       : []),
     { label: 'Verschieben', icon: FolderInput, onSelect: () => setMove(t) },
+    { label: 'Teilen / Exportieren', icon: Share2, onSelect: () => setExportTarget(t) },
+    {
+      label: t.kind === 'folder' ? 'Hierher importieren' : 'Karten importieren (CSV/Text)',
+      icon: Download,
+      onSelect: () => setImportTarget(t.kind === 'folder' ? { folderId: t.item.id } : { deckId: t.item.id }),
+    },
     { label: 'In den Papierkorb', icon: Trash2, danger: true, onSelect: () => void trash(t) },
   ]
 
@@ -110,6 +120,12 @@ export function useItemDialogs(library: Library | undefined, { onTrashed }: Opti
         onClose={() => setForm(null)}
         onSubmit={submitForm}
       />
+      <ExportSheet
+        open={exportTarget !== null}
+        onClose={() => setExportTarget(null)}
+        scope={exportTarget && { kind: exportTarget.kind, id: exportTarget.item.id, name: exportTarget.item.name }}
+      />
+      <ImportSheet open={importTarget !== null} onClose={() => setImportTarget(null)} target={importTarget ?? { folderId: null }} />
       {library && move && (
         <MoveSheet
           open
@@ -137,6 +153,7 @@ export function useItemDialogs(library: Library | undefined, { onTrashed }: Opti
     trash,
     move: setMove,
     create: (kind: 'folder' | 'deck', parentId: Id | null) => setForm({ mode: 'create', kind, parentId }),
+    importInto: (folderId: Id | null) => setImportTarget({ folderId }),
   }
 }
 

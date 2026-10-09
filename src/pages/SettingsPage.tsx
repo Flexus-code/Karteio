@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
-import { BookOpen, Check, ChevronRight, GraduationCap, HardDrive, Info, Palette, ShieldCheck } from 'lucide-react'
+import { BookOpen, Check, ChevronRight, Database, GraduationCap, HardDrive, Info, Palette, ShieldCheck } from 'lucide-react'
+import { DataSection } from '@/features/data/DataSection'
 import { Stepper } from '@/components/Stepper'
 import { Switch } from '@/components/Switch'
 import { ExamCountdown } from '@/features/stats/ExamCountdown'
@@ -103,6 +104,10 @@ export function SettingsPage() {
           </div>
         </Section>
 
+        <Section icon={Database} title="Daten">
+          <DataSection />
+        </Section>
+
         <Section icon={HardDrive} title="Speicher">
           <Card className="divide-y divide-line">
             <Row label="Belegt">{storage ? formatBytes(storage.usage) : '–'}</Row>
@@ -114,7 +119,7 @@ export function SettingsPage() {
             </Row>
           </Card>
           <p className="mt-2 px-1 text-[12.5px] leading-relaxed text-ink-3">
-            Deine Karten werden nur auf diesem Gerät gespeichert. Backups folgen in einem späteren Schritt.
+            Deine Karten werden nur auf diesem Gerät gespeichert – kein Server, kein Konto.
           </p>
         </Section>
 

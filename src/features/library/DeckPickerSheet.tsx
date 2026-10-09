@@ -21,7 +21,7 @@ export function DeckPickerSheet({ open, onClose, library, title, currentDeckId, 
 
   return (
     <Sheet open={open} onClose={onClose} title={title}>
-      {decks.length <= 1 ? (
+      {decks.length === 0 || (currentDeckId && decks.length <= 1) ? (
         <p className="py-8 text-center text-[14px] text-ink-2">Lege zuerst einen weiteren Stapel an.</p>
       ) : (
         <ul className="space-y-1 pt-1">

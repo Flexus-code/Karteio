@@ -297,3 +297,35 @@ button {
   content-visibility: auto;
   contain-intrinsic-size: auto 84px;
 }
+
+/* ---------- Druckansicht ---------- */
+.print-page {
+  --text: #111;
+  --text-2: #444;
+  --text-3: #777;
+  --surface-2: #f2f2f2;
+  --border: #ddd;
+}
+@media print {
+  html,
+  body,
+  #root {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  main.scroll-area {
+    position: static !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  nav,
+  .no-print,
+  [role='status'] {
+    display: none !important;
+  }
+  .print-card {
+    break-inside: avoid;
+  }
+}

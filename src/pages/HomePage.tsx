@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Flame, FolderPlus, Play, Sparkles, Timer } from 'lucide-react'
+import { Flame, FolderPlus, Play, Search, Sparkles, Timer } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '@/components/Card'
 import { PageHeader } from '@/components/PageHeader'
@@ -11,6 +11,7 @@ import { quickStudy } from '@/features/study/session'
 import { toast } from '@/store/toast'
 import { useSettings } from '@/store/settings'
 import { ExamCountdown } from '@/features/stats/ExamCountdown'
+import { BackupReminder } from '@/features/data/BackupReminder'
 
 function greeting(date = new Date()) {
   const h = date.getHours()
@@ -51,7 +52,17 @@ export function HomePage() {
 
   return (
     <>
-      <PageHeader title={greeting()} subtitle={dateLabel} />
+      <PageHeader
+        title={greeting()}
+        subtitle={dateLabel}
+        action={
+          hasCards && (
+            <button onClick={() => navigate('/suche')} aria-label="Suchen" className="flex size-11 items-center justify-center rounded-full bg-surface text-accent shadow-soft">
+              <Search size={20} />
+            </button>
+          )
+        }
+      />
 
       <motion.div variants={list} initial="hidden" animate="show" className="space-y-4 px-5">
         <motion.section variants={item}>
@@ -80,6 +91,8 @@ export function HomePage() {
             </div>
           </div>
         </motion.section>
+
+        <BackupReminder hasCards={hasCards} />
 
         <motion.section variants={item} className="grid grid-cols-3 gap-3">
           <StatTile icon={Flame} label="Streak" value={`${streak}`} unit={streak === 1 ? 'Tag' : 'Tage'} tint="text-warning" />

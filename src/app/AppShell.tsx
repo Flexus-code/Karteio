@@ -9,6 +9,8 @@ import { Onboarding } from '@/features/onboarding/Onboarding'
 import { AchievementWatcher } from '@/features/stats/AchievementWatcher'
 import { useApplyTheme } from '@/lib/theme'
 import { useUiStore } from '@/store/ui'
+import { createSampleContent } from '@/features/data/sample'
+import { toast } from '@/store/toast'
 
 /** Rahmen der App: zentrierte Handy-Ansicht, animierter Seiteninhalt, Tab-Bar. */
 export function AppShell() {
@@ -16,7 +18,7 @@ export function AppShell() {
   const location = useLocation()
   const outlet = useOutlet()
   // Vollbild-Seiten (Editor) ohne Tab-Bar
-  const fullscreen = /\/(neu|bearbeiten|sitzung|sprache)$/.test(location.pathname)
+  const fullscreen = /\/(neu|bearbeiten|sitzung|sprache|druck)$/.test(location.pathname)
   const onboardingDone = useUiStore((s) => s.onboardingDone)
   const setOnboardingDone = useUiStore((s) => s.setOnboardingDone)
 
@@ -40,7 +42,14 @@ export function AppShell() {
         <AchievementWatcher />
         <UpdatePrompt />
         {onboardingDone && <InstallHint />}
-        <AnimatePresence>{!onboardingDone && <Onboarding key="onboarding" onDone={() => setOnboardingDone(true)} />}</AnimatePresence>
+        <AnimatePresence>{!onboardingDone && <Onboarding
+              key="onboarding"
+              onDone={() => setOnboardingDone(true)}
+              onSample={() => {
+                void createSampleContent().then(() => toast('Beispiel-Stapel angelegt – viel Spaß beim Ausprobieren!', { tone: 'success' }))
+                setOnboardingDone(true)
+              }}
+            />}</AnimatePresence>
         <SplashScreen />
       </div>
     </div>

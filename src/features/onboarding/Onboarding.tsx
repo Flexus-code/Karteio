@@ -59,9 +59,11 @@ const SLIDES: Slide[] = [
 
 interface OnboardingProps {
   onDone: () => void
+  /** Startet mit Beispiel-Stapel */
+  onSample?: () => void
 }
 
-export function Onboarding({ onDone }: OnboardingProps) {
+export function Onboarding({ onDone, onSample }: OnboardingProps) {
   const [[index, direction], setPage] = useState<[number, number]>([0, 0])
   const last = index === SLIDES.length - 1
   const slide = SLIDES[index]!
@@ -165,6 +167,11 @@ export function Onboarding({ onDone }: OnboardingProps) {
           <Button block onClick={() => (last ? onDone() : go(index + 1))}>
             {last ? "Los geht's" : 'Weiter'} <ArrowRight size={18} />
           </Button>
+          {last && onSample && (
+            <Button block variant="ghost" className="-mt-2" onClick={onSample}>
+              Mit Beispiel-Stapel starten
+            </Button>
+          )}
         </div>
       </div>
     </motion.div>

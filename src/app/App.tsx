@@ -9,6 +9,8 @@ import { DeckPage } from '@/pages/DeckPage'
 import { LearnPage } from '@/pages/LearnPage'
 import { StatsPage } from '@/pages/StatsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { SearchPage } from '@/pages/SearchPage'
+import { TrashPage } from '@/pages/TrashPage'
 
 // Der Editor (TipTap) ist groß – erst laden, wenn er gebraucht wird
 const CardEditorPage = lazy(() => import('@/pages/CardEditorPage').then((m) => ({ default: m.CardEditorPage })))
@@ -26,6 +28,14 @@ const VoiceCreatePage = lazy(() => import('@/pages/VoiceCreatePage').then((m) =>
 const voice = (
   <Suspense fallback={<LibrarySkeleton />}>
     <VoiceCreatePage />
+  </Suspense>
+)
+
+const PrintPage = lazy(() => import('@/pages/PrintPage').then((m) => ({ default: m.PrintPage })))
+
+const print = (
+  <Suspense fallback={<LibrarySkeleton />}>
+    <PrintPage />
   </Suspense>
 )
 
@@ -47,6 +57,9 @@ export function App() {
             <Route path="stapel/:deckId" element={<DeckPage />} />
             <Route path="stapel/:deckId/neu" element={editor} />
             <Route path="stapel/:deckId/sprache" element={voice} />
+            <Route path="stapel/:deckId/druck" element={print} />
+            <Route path="suche" element={<SearchPage />} />
+            <Route path="papierkorb" element={<TrashPage />} />
             <Route path="karte/:cardId/bearbeiten" element={editor} />
             <Route path="lernen" element={<LearnPage />} />
             <Route path="lernen/sitzung" element={session} />

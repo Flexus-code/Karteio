@@ -10,7 +10,7 @@ function mediaOf(d: CardDraft) {
 }
 
 /** Legt fehlende Lernstände an und entfernt nicht mehr benötigte (z. B. gelöschte Lücken). */
-async function syncStates(card: Card) {
+export async function syncStates(card: Card) {
   const wanted = stateIdsFor(card)
   const existing = await db.cardStates.where('cardId').equals(card.id).toArray()
   const obsolete = existing.filter((s) => !wanted.includes(s.id)).map((s) => s.id)
@@ -103,6 +103,17 @@ export async function duplicateCard(id: Id): Promise<Card | undefined> {
       tags: card.tags,
     }),
   )
+}
+
+/** Löscht Karten endgültig – samt Lernständen, Verlauf und Bildern. */
+export async function deleteCardsForever(ids: Id[]) {
+  await db.transaction('rw', db.cards, db.cardStates, db.reviews, db.media, async () => {
+    const cards = await db.cards.bulkGet(ids)
+    await db.media.bulkDelete(cards.flatMap((c) => c?.mediaIds ?? []))
+    await db.cardStates.where('cardId').anyOf(ids).delete()
+    await db.reviews.where('cardId').anyOf(ids).delete()
+    await db.cards.bulkDelete(ids)
+  })
 }
 
 export async function trashCards(ids: Id[]) {

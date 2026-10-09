@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, FolderOpen, FolderPlus, Layers, MoreHorizontal, Play, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, FolderOpen, FolderPlus, Layers, MoreHorizontal, Play, Plus, Search, Sparkles, Trash2 } from 'lucide-react'
+import { createSampleContent } from '@/features/data/sample'
 import { quickStudy } from '@/features/study/session'
 import { toast } from '@/store/toast'
 import { useState } from 'react'
@@ -39,6 +40,12 @@ export function LibraryView({ library, folderId }: LibraryViewProps) {
       if (t.kind === 'folder' && t.item.id === folderId) navigate(parentId ? `/ordner/${parentId}` : '/ordner', { replace: true })
     },
   })
+
+  const loadSample = async () => {
+    const res = await createSampleContent()
+    toast(`Beispiel mit ${res.cards} Karten angelegt`, { tone: 'success' })
+    navigate(`/ordner/${res.folderId}`)
+  }
 
   const folders = library.foldersIn(folderId)
   const decks = library.decksIn(folderId)
@@ -90,8 +97,14 @@ export function LibraryView({ library, folderId }: LibraryViewProps) {
           title="Ordner"
           subtitle={library.decks.size > 0 ? plural(library.totalStats().total, 'Karte', 'Karten') + ' insgesamt' : undefined}
           action={
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               {sortButton}
+              <button onClick={() => navigate('/suche')} aria-label="Suchen" className="flex size-11 items-center justify-center rounded-full text-accent">
+                <Search size={21} />
+              </button>
+              <button onClick={() => navigate('/papierkorb')} aria-label="Papierkorb" className="flex size-11 items-center justify-center rounded-full text-ink-3">
+                <Trash2 size={20} />
+              </button>
               {addButton}
             </div>
           }
@@ -115,6 +128,11 @@ export function LibraryView({ library, folderId }: LibraryViewProps) {
               <Button variant="ghost" onClick={() => dialogs.create('deck', folderId)}>
                 <Layers size={18} /> Stapel erstellen
               </Button>
+              {!folder && (
+                <Button variant="ghost" onClick={() => void loadSample()}>
+                  <Sparkles size={18} /> Beispiel-Stapel laden
+                </Button>
+              )}
             </div>
           }
         />
@@ -183,6 +201,8 @@ export function LibraryView({ library, folderId }: LibraryViewProps) {
         actions={[
           { label: folder ? 'Neuer Unterordner' : 'Neuer Ordner', icon: FolderPlus, onSelect: () => dialogs.create('folder', folderId) },
           { label: 'Neuer Stapel', icon: Layers, onSelect: () => dialogs.create('deck', folderId) },
+          { label: 'Importieren', icon: Download, onSelect: () => dialogs.importInto(folderId) },
+          ...(folderId ? [] : [{ label: 'Beispiel-Stapel laden', icon: Sparkles, onSelect: () => void loadSample() }]),
         ]}
       />
       {dialogs.dialogs}
