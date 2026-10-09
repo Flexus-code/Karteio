@@ -1,7 +1,7 @@
 import { motion, useAnimationControls } from 'framer-motion'
 import { ChevronDown, Eye, Save, SkipForward, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ActionSheet } from '@/components/ActionSheet'
 import { Button } from '@/components/Button'
 import { db } from '@/db/db'
@@ -52,6 +52,7 @@ export function CardEditorPage() {
 
 function CardEditor({ deck, card }: { deck: Deck; card?: Card }) {
   const navigate = useNavigate()
+  const returnTo = (useLocation().state as { returnTo?: string } | null)?.returnTo
   const isEdit = Boolean(card)
   const storageKey = draftKey(isEdit ? 'edit' : 'new', card?.id ?? deck.id)
   const original = useRef<CardDraft>(card ? draftFromCard(card) : emptyDraft())
@@ -87,7 +88,7 @@ function CardEditor({ deck, card }: { deck: Deck; card?: Card }) {
   }, [draft, dirty, storageKey])
 
   const patch = (p: Partial<CardDraft>) => setDraft((d) => ({ ...d, ...p }))
-  const back = () => navigate(`/stapel/${deck.id}`, { replace: true })
+  const back = () => navigate(returnTo ?? `/stapel/${deck.id}`, { replace: true })
 
   const save = async (next: boolean) => {
     const error = validateDraft(draft)

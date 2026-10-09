@@ -12,13 +12,17 @@ export interface FaceVariant {
 }
 
 interface CardFaceProps {
-  card: Pick<CardDraft, 'type' | 'front' | 'back' | 'choices' | 'notes'>
+  card: Pick<CardDraft, 'type' | 'front' | 'back'> & { choices?: Choice[]; notes?: string }
   side: 'front' | 'back'
   variant?: FaceVariant
+  /** Antwortmöglichkeiten nicht anzeigen (werden z. B. im Quiz interaktiv dargestellt) */
+  hideChoices?: boolean
+  /** Überschrift „Frage“/„Antwort“ ausblenden */
+  hideLabel?: boolean
 }
 
 /** Inhalt einer Kartenseite – für Vorschau und Lernmodus. */
-export function CardFace({ card, side, variant = {} }: CardFaceProps) {
+export function CardFace({ card, side, variant = {}, hideChoices, hideLabel }: CardFaceProps) {
   const label = side === 'front' ? 'Frage' : 'Antwort'
 
   const body = (() => {
@@ -37,22 +41,21 @@ export function CardFace({ card, side, variant = {} }: CardFaceProps) {
         return (
           <>
             <RichTextView content={card.front} />
-            <ChoiceList choices={card.choices} reveal={side === 'back'} />
+            {!hideChoices && <ChoiceList choices={card.choices ?? []} reveal={side === 'back'} />}
             {side === 'back' && !isDocEmpty(card.back) && <Extra doc={card.back} />}
           </>
         )
-      case 'reversible': {
+      default: {
+        // Standard, umkehrbar, Eingabe – bei umgekehrter Richtung werden die Seiten getauscht
         const show = (side === 'front') !== Boolean(variant.reverse) ? card.front : card.back
         return <RichTextView content={show} />
       }
-      default:
-        return <RichTextView content={side === 'front' ? card.front : card.back} />
     }
   })()
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-[11.5px] font-semibold uppercase tracking-wide text-ink-3">{label}</span>
+      {!hideLabel && <span className="text-[11.5px] font-semibold uppercase tracking-wide text-ink-3">{label}</span>}
       {body}
       {side === 'back' && card.notes && (
         <div className="mt-1 flex gap-2 rounded-2xl bg-warning/12 px-3 py-2.5 text-[14px] leading-snug">

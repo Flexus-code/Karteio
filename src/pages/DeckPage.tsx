@@ -14,6 +14,7 @@ import { useCardActions } from '@/features/cards/useCardActions'
 import { ItemIcon } from '@/features/library/ItemIcon'
 import { LibrarySkeleton } from '@/features/library/LibrarySkeleton'
 import { useItemDialogs } from '@/features/library/useItemDialogs'
+import { StudyButton } from '@/features/library/LibraryView'
 import { useLibrary } from '@/features/library/useLibrary'
 
 export function DeckPage() {
@@ -93,6 +94,7 @@ export function DeckPage() {
             {deck.description && <p className="text-[14px] text-ink-2">{deck.description}</p>}
           </div>
         </div>
+        {cards.length > 0 && <StudyButton scope={{ kind: 'deck', id: deck.id }} due={stats.due + stats.newCount} label="Stapel lernen" />}
       </header>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="mb-5 grid grid-cols-3 gap-3 px-5">

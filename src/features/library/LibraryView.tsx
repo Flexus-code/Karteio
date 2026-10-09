@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, FolderOpen, FolderPlus, Layers, MoreHorizontal, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, FolderOpen, FolderPlus, Layers, MoreHorizontal, Play, Plus } from 'lucide-react'
+import { quickStudy } from '@/features/study/session'
+import { toast } from '@/store/toast'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ActionSheet } from '@/components/ActionSheet'
@@ -188,6 +190,22 @@ export function LibraryView({ library, folderId }: LibraryViewProps) {
   )
 }
 
+export function StudyButton({ scope, due, label }: { scope: Parameters<typeof quickStudy>[0]; due: number; label: string }) {
+  const navigate = useNavigate()
+  return (
+    <Pressable
+      onClick={async () => {
+        if (await quickStudy(scope)) navigate('/lernen/sitzung')
+        else toast('Hier gibt es noch keine Karten zum Lernen.')
+      }}
+      className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl accent-gradient text-[15px] font-semibold text-white shadow-[0_10px_24px_-12px_var(--accent)]"
+    >
+      <Play size={16} fill="currentColor" /> {label}
+      {due > 0 && <span className="rounded-full bg-white/25 px-2 py-0.5 text-[12px] font-bold">{due}</span>}
+    </Pressable>
+  )
+}
+
 function SectionTitle({ children }: { children: string }) {
   return <h2 className="mb-2.5 px-1 text-[13px] font-semibold uppercase tracking-wide text-ink-3">{children}</h2>
 }
@@ -245,6 +263,7 @@ function FolderHeader({ library, folder, stats, onBack, onMenu, actions }: Folde
           </motion.p>
         </div>
       </div>
+      {stats.total > 0 && <StudyButton scope={{ kind: 'folder', id: folder.id }} due={stats.due + stats.newCount} label="Ganzen Ordner lernen" />}
     </header>
   )
 }

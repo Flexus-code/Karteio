@@ -95,6 +95,10 @@ export interface Review {
   reviewedAt: number
   durationMs: number
   mode: StudyMode
+  /** War die Karte vor dieser Bewertung neu? (für das Tageslimit neuer Karten) */
+  wasNew?: boolean
+  /** Antwort richtig? (Quiz, Schreiben, Prüfung) */
+  correct?: boolean
 }
 
 export interface Media {

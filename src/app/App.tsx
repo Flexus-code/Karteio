@@ -13,6 +13,14 @@ import { SettingsPage } from '@/pages/SettingsPage'
 // Der Editor (TipTap) ist groß – erst laden, wenn er gebraucht wird
 const CardEditorPage = lazy(() => import('@/pages/CardEditorPage').then((m) => ({ default: m.CardEditorPage })))
 
+const StudySessionPage = lazy(() => import('@/pages/StudySessionPage').then((m) => ({ default: m.StudySessionPage })))
+
+const session = (
+  <Suspense fallback={<LibrarySkeleton />}>
+    <StudySessionPage />
+  </Suspense>
+)
+
 const editor = (
   <Suspense fallback={<LibrarySkeleton />}>
     <CardEditorPage />
@@ -32,6 +40,7 @@ export function App() {
             <Route path="stapel/:deckId/neu" element={editor} />
             <Route path="karte/:cardId/bearbeiten" element={editor} />
             <Route path="lernen" element={<LearnPage />} />
+            <Route path="lernen/sitzung" element={session} />
             <Route path="statistik" element={<StatsPage />} />
             <Route path="einstellungen" element={<SettingsPage />} />
             <Route path="*" element={<HomePage />} />

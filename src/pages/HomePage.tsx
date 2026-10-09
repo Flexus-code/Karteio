@@ -5,6 +5,10 @@ import { Card } from '@/components/Card'
 import { PageHeader } from '@/components/PageHeader'
 import { Pressable } from '@/components/Pressable'
 import { ProgressRing } from '@/components/ProgressRing'
+import { useLibrary } from '@/features/library/useLibrary'
+import { useTodayStats } from '@/features/stats/useToday'
+import { quickStudy } from '@/features/study/session'
+import { toast } from '@/store/toast'
 
 function greeting(date = new Date()) {
   const h = date.getHours()
@@ -25,17 +29,26 @@ const item = {
 
 export function HomePage() {
   const navigate = useNavigate()
-  const today = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })
+  const dateLabel = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })
 
-  // Platzhalterwerte – werden in Meilenstein 4/5 mit echten Daten verbunden
-  const due = 0
-  const doneToday = 0
-  const streak = 0
-  const minutes = 0
+  const library = useLibrary()
+  const today = useTodayStats()
+  const totals = library?.totalStats()
+  const due = totals ? totals.due + totals.newCount : 0
+  const doneToday = today?.reviews ?? 0
+  const streak = today?.streak ?? 0
+  const minutes = today?.minutes ?? 0
+  const hasCards = (totals?.total ?? 0) > 0
+
+  const learn = async () => {
+    if (!hasCards) return navigate('/ordner')
+    if (await quickStudy({ kind: 'all' })) navigate('/lernen/sitzung')
+    else toast('Noch keine Karten zum Lernen.')
+  }
 
   return (
     <>
-      <PageHeader title={greeting()} subtitle={today} />
+      <PageHeader title={greeting()} subtitle={dateLabel} />
 
       <motion.div variants={list} initial="hidden" animate="show" className="space-y-4 px-5">
         <motion.section variants={item}>
@@ -45,18 +58,18 @@ export function HomePage() {
             <div className="relative flex items-center gap-5">
               <ProgressRing value={due === 0 ? 0 : doneToday / (doneToday + due)} size={92} stroke={9}>
                 <span className="text-2xl font-bold leading-none">{due}</span>
-                <span className="mt-0.5 text-[11px] font-medium opacity-80">fällig</span>
+                <span className="mt-0.5 text-[11px] font-medium opacity-80">offen</span>
               </ProgressRing>
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-medium opacity-80">Heute</p>
                 <p className="mb-3 text-lg font-semibold leading-snug">
-                  {due === 0 ? 'Alles erledigt – leg neue Karten an.' : `${due} Karten warten auf dich`}
+                  {!hasCards ? 'Leg deine ersten Karten an.' : due === 0 ? 'Alles erledigt – frei üben?' : `${due} ${due === 1 ? 'Karte wartet' : 'Karten warten'} auf dich`}
                 </p>
                 <Pressable
-                  onClick={() => navigate('/lernen')}
+                  onClick={() => void learn()}
                   className="inline-flex min-h-10 items-center gap-2 rounded-full bg-white px-4 text-[14px] font-semibold text-accent shadow-soft"
                 >
-                  <Play size={15} fill="currentColor" /> Jetzt lernen
+                  <Play size={15} fill="currentColor" /> {!hasCards ? 'Karten anlegen' : due === 0 ? 'Frei üben' : 'Jetzt lernen'}
                 </Pressable>
               </div>
             </div>
@@ -66,7 +79,7 @@ export function HomePage() {
         <motion.section variants={item} className="grid grid-cols-3 gap-3">
           <StatTile icon={Flame} label="Streak" value={`${streak}`} unit="Tage" tint="text-warning" />
           <StatTile icon={Timer} label="Lernzeit" value={`${minutes}`} unit="Min." tint="text-accent" />
-          <StatTile icon={Sparkles} label="Gelernt" value={`${doneToday}`} unit="Karten" tint="text-success" />
+          <StatTile icon={Sparkles} label="Heute" value={`${doneToday}`} unit="Karten" tint="text-success" />
         </motion.section>
 
         <motion.section variants={item}>
