@@ -137,7 +137,7 @@ export function DeckPage() {
               </>
             ) : (
               <>
-                <label className="flex h-10 flex-1 items-center gap-2 rounded-xl bg-surface-2 px-3">
+                <label className="flex h-10 flex-1 items-center gap-2 rounded-xl border border-transparent bg-surface-2 px-3 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_4px_var(--accent-soft)]">
                   <Search size={16} className="shrink-0 text-ink-3" />
                   <input
                     value={query}

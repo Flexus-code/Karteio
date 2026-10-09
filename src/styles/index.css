@@ -118,9 +118,47 @@ button {
   cursor: pointer;
 }
 
+/* Fokus-Rahmen nur für Tastaturbedienung von Buttons & Co. –
+   Eingabefelder zeigen ihren Fokus über den eigenen, weichen Rahmen (focus-within) */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+[contenteditable]:focus,
+[contenteditable]:focus-visible,
+[role='button']:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Eigenständige Eingabefelder: weicher Akzent-Rahmen statt Browser-Standard */
+input:not([type='checkbox']):not([type='radio']):focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+/* Felder ohne eigenen Rahmen (in einem Container) bekommen keinen Schatten */
+input.bg-transparent:focus,
+textarea.bg-transparent:focus {
+  box-shadow: none;
+}
+
+input:not([type='date']):not([type='checkbox']):not([type='radio']),
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+}
+input,
+textarea {
+  caret-color: var(--accent);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .scroll-area {

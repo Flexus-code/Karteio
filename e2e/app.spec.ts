@@ -3,7 +3,9 @@ import { expect, test, type Page } from '@playwright/test'
 /** Startbildschirm und Kurzanleitung überspringen */
 async function skipIntro(page: Page) {
   const splash = page.getByRole('presentation')
-  if (await splash.isVisible().catch(() => false)) await splash.click()
+  // Antippen überspringt den Startbildschirm; blendet er schon aus, ist er nicht mehr antippbar
+  await splash.click({ timeout: 1500 }).catch(() => undefined)
+  await expect(splash).toHaveCount(0, { timeout: 5000 })
   await page.getByRole('button', { name: 'Überspringen' }).click()
   await expect(page.getByRole('dialog', { name: 'Kurzanleitung' })).toBeHidden()
   // Im Safari-Tab (nicht installiert) erscheint die Installationsanleitung
@@ -108,4 +110,15 @@ test('Backup wird als Datei erstellt', async ({ page }) => {
   const file = await download
   expect(file.suggestedFilename()).toMatch(/^karteio-backup-\d{4}-\d{2}-\d{2}\.json$/)
   await expect(page.getByText(/Backup erstellt: 9 Karten/)).toBeVisible()
+})
+
+test('Startbildschirm bleibt nach dem Wegtippen weg', async ({ page }) => {
+  await page.goto('')
+  const splash = page.getByRole('presentation')
+  await expect(splash).toBeVisible()
+  await splash.click()
+  // Länger warten als die ganze Startanimation dauert (≈ 3 s)
+  await page.waitForTimeout(3500)
+  await expect(splash).toHaveCount(0)
+  await expect(page.getByRole('dialog', { name: 'Kurzanleitung' })).toBeVisible()
 })

@@ -30,7 +30,8 @@ export function SplashScreen({ onFinished }: SplashScreenProps) {
       const t = setTimeout(() => setPhase('done'), 900)
       return () => clearTimeout(t)
     }
-    const timers = TIMELINE.map(([p, ms]) => setTimeout(() => setPhase(p), ms))
+    // Einmal beendet (z. B. durch Antippen) bleibt der Startbildschirm weg – spätere Schritte werden ignoriert
+    const timers = TIMELINE.map(([p, ms]) => setTimeout(() => setPhase((cur) => (cur === 'done' ? cur : p)), ms))
     return () => timers.forEach(clearTimeout)
   }, [reduced])
 
@@ -65,7 +66,7 @@ export function SplashScreen({ onFinished }: SplashScreenProps) {
           role="presentation"
           onClick={() => setPhase('done')}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden accent-gradient text-white"
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, pointerEvents: 'none' }}
           transition={{ duration: 0.35 }}
         >
           {/* Hintergrund-Glows */}

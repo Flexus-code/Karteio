@@ -102,7 +102,7 @@ export function SearchPage() {
           <button onClick={() => navigate(-1)} aria-label="Zurück" className="flex size-11 shrink-0 items-center justify-center text-accent">
             <ChevronLeft size={24} />
           </button>
-          <label className="flex h-11 flex-1 items-center gap-2 rounded-2xl bg-surface-2 px-3.5">
+          <label className="flex h-11 flex-1 items-center gap-2 rounded-2xl border border-transparent bg-surface-2 px-3.5 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_4px_var(--accent-soft)]">
             <Search size={18} className="shrink-0 text-ink-3" />
             <input
               autoFocus
