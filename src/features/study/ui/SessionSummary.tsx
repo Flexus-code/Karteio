@@ -10,6 +10,7 @@ import { ProgressRing } from '@/components/ProgressRing'
 import { db } from '@/db/db'
 import { cardPreviewText } from '@/features/cards/CardRow'
 import { ihkGrade } from '../answer'
+import { saveExamResult } from '@/features/stats/useStatsData'
 import { resetSession, startSession, useSession } from '../session'
 
 function formatDuration(ms: number) {
@@ -42,6 +43,12 @@ export function SessionSummary() {
   }, [results, queue, isExam])
 
   const wrongCards = useLiveQuery(() => db.cards.bulkGet([...new Set(wrongItems.map((w) => w.cardId))]), [wrongItems])
+
+  // Prüfungsergebnis für Statistik und Erfolge merken
+  useEffect(() => {
+    if (!isExam || results.length === 0) return
+    void saveExamResult({ date: Date.now(), percent, grade: grade.grade, questions: total })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (results.length === 0) return

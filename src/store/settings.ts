@@ -10,6 +10,11 @@ export interface LearningSettings {
   retention: number
   /** Antworten im Schreibmodus mit kleinen Tippfehlern gelten als richtig */
   typoTolerance: boolean
+  /** Antworten pro Tag als Ziel */
+  dailyGoal: number
+  /** Prüfungsdatum als JJJJ-MM-TT */
+  examDate: string | null
+  examName: string
 }
 
 interface SettingsState extends LearningSettings {
@@ -21,6 +26,9 @@ export const DEFAULT_SETTINGS: LearningSettings = {
   dailyReviewLimit: 200,
   retention: 0.9,
   typoTolerance: true,
+  dailyGoal: 30,
+  examDate: null,
+  examName: 'IHK-Abschlussprüfung',
 }
 
 export const useSettings = create<SettingsState>()(

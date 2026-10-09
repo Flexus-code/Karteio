@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CalendarClock, Flame, FolderPlus, Play, Sparkles, Timer } from 'lucide-react'
+import { Flame, FolderPlus, Play, Sparkles, Timer } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '@/components/Card'
 import { PageHeader } from '@/components/PageHeader'
@@ -9,6 +9,8 @@ import { useLibrary } from '@/features/library/useLibrary'
 import { useTodayStats } from '@/features/stats/useToday'
 import { quickStudy } from '@/features/study/session'
 import { toast } from '@/store/toast'
+import { useSettings } from '@/store/settings'
+import { ExamCountdown } from '@/features/stats/ExamCountdown'
 
 function greeting(date = new Date()) {
   const h = date.getHours()
@@ -39,6 +41,7 @@ export function HomePage() {
   const streak = today?.streak ?? 0
   const minutes = today?.minutes ?? 0
   const hasCards = (totals?.total ?? 0) > 0
+  const goal = useSettings((s) => s.dailyGoal)
 
   const learn = async () => {
     if (!hasCards) return navigate('/ordner')
@@ -56,12 +59,14 @@ export function HomePage() {
             <div className="pointer-events-none absolute -right-10 -top-12 size-44 rounded-full bg-white/10" />
             <div className="pointer-events-none absolute -bottom-16 right-16 size-32 rounded-full bg-white/10" />
             <div className="relative flex items-center gap-5">
-              <ProgressRing value={due === 0 ? 0 : doneToday / (doneToday + due)} size={92} stroke={9}>
+              <ProgressRing value={doneToday / goal} size={92} stroke={9}>
                 <span className="text-2xl font-bold leading-none">{due}</span>
                 <span className="mt-0.5 text-[11px] font-medium opacity-80">offen</span>
               </ProgressRing>
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-medium opacity-80">Heute</p>
+                <p className="text-[13px] font-medium opacity-80">
+                  Tagesziel {Math.min(doneToday, goal)}/{goal} {doneToday >= goal && '✓'}
+                </p>
                 <p className="mb-3 text-lg font-semibold leading-snug">
                   {!hasCards ? 'Leg deine ersten Karten an.' : due === 0 ? 'Alles erledigt – frei üben?' : `${due} ${due === 1 ? 'Karte wartet' : 'Karten warten'} auf dich`}
                 </p>
@@ -77,23 +82,13 @@ export function HomePage() {
         </motion.section>
 
         <motion.section variants={item} className="grid grid-cols-3 gap-3">
-          <StatTile icon={Flame} label="Streak" value={`${streak}`} unit="Tage" tint="text-warning" />
+          <StatTile icon={Flame} label="Streak" value={`${streak}`} unit={streak === 1 ? 'Tag' : 'Tage'} tint="text-warning" />
           <StatTile icon={Timer} label="Lernzeit" value={`${minutes}`} unit="Min." tint="text-accent" />
           <StatTile icon={Sparkles} label="Heute" value={`${doneToday}`} unit="Karten" tint="text-success" />
         </motion.section>
 
         <motion.section variants={item}>
-          <Pressable onClick={() => navigate('/einstellungen')} className="block w-full text-left">
-            <Card className="flex items-center gap-4 p-4">
-              <div className="flex size-11 items-center justify-center rounded-2xl bg-accent-soft text-accent">
-                <CalendarClock size={22} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[15px] font-semibold">Prüfungs-Countdown</p>
-                <p className="text-[13px] text-ink-2">Prüfungsdatum festlegen und Lernplan erhalten</p>
-              </div>
-            </Card>
-          </Pressable>
+          <ExamCountdown newCount={totals?.newCount ?? 0} />
         </motion.section>
 
         <motion.section variants={item}>
@@ -104,7 +99,7 @@ export function HomePage() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[15px] font-semibold">Ordner & Karten</p>
-                <p className="text-[13px] text-ink-2">Lege deinen ersten Ordner an</p>
+                <p className="text-[13px] text-ink-2">{hasCards ? `${totals?.total} Abfragen in ${library?.decks.size} Stapeln` : 'Lege deinen ersten Ordner an'}</p>
               </div>
             </Card>
           </Pressable>

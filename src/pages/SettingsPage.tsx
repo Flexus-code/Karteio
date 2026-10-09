@@ -1,5 +1,10 @@
 import { motion } from 'framer-motion'
-import { BookOpen, Check, ChevronRight, HardDrive, Info, Palette, ShieldCheck } from 'lucide-react'
+import { BookOpen, Check, ChevronRight, GraduationCap, HardDrive, Info, Palette, ShieldCheck } from 'lucide-react'
+import { Stepper } from '@/components/Stepper'
+import { Switch } from '@/components/Switch'
+import { ExamCountdown } from '@/features/stats/ExamCountdown'
+import { useLibrary } from '@/features/library/useLibrary'
+import { useSettings } from '@/store/settings'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Card } from '@/components/Card'
 import { PageHeader } from '@/components/PageHeader'
@@ -15,6 +20,8 @@ const THEME_OPTIONS: { value: ThemeMode; label: string }[] = [
 
 export function SettingsPage() {
   const { theme, accent, setTheme, setAccent, setOnboardingDone } = useUiStore()
+  const learning = useSettings()
+  const library = useLibrary()
   const [storage, setStorage] = useState<{ usage: number; quota: number } | null>(null)
   const [persisted, setPersisted] = useState<boolean | null>(null)
 
@@ -68,6 +75,32 @@ export function SettingsPage() {
               </div>
             </div>
           </Card>
+        </Section>
+
+        <Section icon={GraduationCap} title="Lernen">
+          <Card className="divide-y divide-line">
+            <Stepper label="Tagesziel" description="Antworten pro Tag" value={learning.dailyGoal} min={5} max={500} step={5} onChange={(dailyGoal) => learning.update({ dailyGoal })} />
+            <Stepper label="Neue Karten pro Tag" value={learning.dailyNewLimit} min={0} max={500} step={5} onChange={(dailyNewLimit) => learning.update({ dailyNewLimit })} />
+            <Stepper label="Wiederholungen pro Tag" description="Höchstens" value={learning.dailyReviewLimit} min={10} max={2000} step={10} onChange={(dailyReviewLimit) => learning.update({ dailyReviewLimit })} />
+            <div className="px-4 py-3">
+              <p className="text-[15px]">Ziel-Behaltensrate</p>
+              <p className="mb-2.5 text-[12.5px] text-ink-3">Höher = häufigere Wiederholungen, aber sichereres Wissen</p>
+              <Segmented
+                ariaLabel="Ziel-Behaltensrate"
+                value={String(learning.retention)}
+                options={[
+                  { value: '0.85', label: '85 %' },
+                  { value: '0.9', label: '90 %' },
+                  { value: '0.95', label: '95 %' },
+                ]}
+                onChange={(v) => learning.update({ retention: Number(v) })}
+              />
+            </div>
+            <Switch label="Tippfehler tolerieren" description="Kleine Tippfehler im Schreibmodus zählen als richtig" checked={learning.typoTolerance} onChange={(typoTolerance) => learning.update({ typoTolerance })} />
+          </Card>
+          <div className="mt-3">
+            <ExamCountdown newCount={library?.totalStats().newCount ?? 0} />
+          </div>
         </Section>
 
         <Section icon={HardDrive} title="Speicher">

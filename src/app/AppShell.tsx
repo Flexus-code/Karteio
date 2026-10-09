@@ -6,6 +6,7 @@ import { TabBar } from '@/components/TabBar'
 import { Toaster } from '@/components/Toaster'
 import { UpdatePrompt } from '@/components/UpdatePrompt'
 import { Onboarding } from '@/features/onboarding/Onboarding'
+import { AchievementWatcher } from '@/features/stats/AchievementWatcher'
 import { useApplyTheme } from '@/lib/theme'
 import { useUiStore } from '@/store/ui'
 
@@ -36,6 +37,7 @@ export function AppShell() {
         </AnimatePresence>
         <AnimatePresence>{!fullscreen && <TabBar key="tabbar" />}</AnimatePresence>
         <Toaster />
+        <AchievementWatcher />
         <UpdatePrompt />
         {onboardingDone && <InstallHint />}
         <AnimatePresence>{!onboardingDone && <Onboarding key="onboarding" onDone={() => setOnboardingDone(true)} />}</AnimatePresence>
