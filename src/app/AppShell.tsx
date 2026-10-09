@@ -15,7 +15,7 @@ export function AppShell() {
   const location = useLocation()
   const outlet = useOutlet()
   // Vollbild-Seiten (Editor) ohne Tab-Bar
-  const fullscreen = /\/(neu|bearbeiten|sitzung)$/.test(location.pathname)
+  const fullscreen = /\/(neu|bearbeiten|sitzung|sprache)$/.test(location.pathname)
   const onboardingDone = useUiStore((s) => s.onboardingDone)
   const setOnboardingDone = useUiStore((s) => s.setOnboardingDone)
 

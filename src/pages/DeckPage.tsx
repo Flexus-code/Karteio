@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ChevronLeft, Flag, FolderInput, MoreHorizontal, PenLine, Plus, Search, Tag, Trash2, X } from 'lucide-react'
+import { ChevronLeft, Flag, FolderInput, Mic, MoreHorizontal, PenLine, Plus, Search, Tag, Trash2, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
@@ -109,9 +109,14 @@ export function DeckPage() {
           title="Noch keine Karten"
           text="Schreib deine erste Karteikarte – Vorderseite mit der Frage, Rückseite mit der Antwort."
           action={
-            <Button onClick={newCard}>
-              <Plus size={18} /> Karte hinzufügen
-            </Button>
+            <div className="flex flex-col items-center gap-2">
+              <Button onClick={newCard}>
+                <Plus size={18} /> Karte hinzufügen
+              </Button>
+              <Button variant="ghost" onClick={() => navigate(`/stapel/${deck.id}/sprache`)}>
+                <Mic size={18} /> Per Sprache erstellen
+              </Button>
+            </div>
           }
         />
       ) : (
@@ -183,8 +188,15 @@ export function DeckPage() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className="fixed bottom-[calc(var(--tabbar-h)+var(--safe-bottom)+16px)] right-[max(20px,calc(50vw-220px))] z-20"
+            className="fixed bottom-[calc(var(--tabbar-h)+var(--safe-bottom)+16px)] right-[max(20px,calc(50vw-220px))] z-20 flex flex-col items-center gap-3"
           >
+            <Pressable
+              onClick={() => navigate(`/stapel/${deck.id}/sprache`)}
+              aria-label="Karte per Sprache erstellen"
+              className="flex size-12 items-center justify-center rounded-full border border-line bg-surface text-accent shadow-lift"
+            >
+              <Mic size={22} />
+            </Pressable>
             <Pressable
               onClick={newCard}
               aria-label="Neue Karte"

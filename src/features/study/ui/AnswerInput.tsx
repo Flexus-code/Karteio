@@ -8,6 +8,8 @@ interface AnswerInputProps {
   expected: string
   /** Wird nach dem Prüfen aufgerufen */
   onChecked: (result: CheckResult, input: string) => void
+  /** Ohne Eingabe: nur die Lösung aufdecken (selbst bewerten) */
+  onReveal: () => void
   checked: { result: CheckResult; input: string } | null
   autoFocus?: boolean
 }
@@ -19,13 +21,14 @@ const RESULT_UI: Record<CheckResult, { label: string; icon: typeof CheckCircle2;
 }
 
 /** Eingabefeld für Antworten mit Vergleich und farbiger Hervorhebung der Abweichungen. */
-export function AnswerInput({ expected, onChecked, checked, autoFocus }: AnswerInputProps) {
+export function AnswerInput({ expected, onChecked, onReveal, checked, autoFocus }: AnswerInputProps) {
   const [value, setValue] = useState('')
   const tolerant = useSettings((s) => s.typoTolerance)
 
   const submit = () => {
     if (checked) return
-    onChecked(checkAnswer(value, expected, tolerant), value)
+    if (!value.trim()) onReveal()
+    else onChecked(checkAnswer(value, expected, tolerant), value)
   }
 
   if (checked) {
@@ -95,7 +98,7 @@ export function AnswerInput({ expected, onChecked, checked, autoFocus }: AnswerI
         className="min-w-0 flex-1 bg-transparent py-2 text-ink outline-none placeholder:text-ink-3"
       />
       <button type="submit" className="flex h-10 items-center gap-1.5 rounded-xl bg-accent px-4 text-[14px] font-semibold text-white">
-        Prüfen <CornerDownLeft size={15} />
+        {value.trim() ? 'Prüfen' : 'Lösung zeigen'} <CornerDownLeft size={15} />
       </button>
     </form>
   )

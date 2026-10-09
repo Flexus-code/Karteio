@@ -21,6 +21,14 @@ const session = (
   </Suspense>
 )
 
+const VoiceCreatePage = lazy(() => import('@/pages/VoiceCreatePage').then((m) => ({ default: m.VoiceCreatePage })))
+
+const voice = (
+  <Suspense fallback={<LibrarySkeleton />}>
+    <VoiceCreatePage />
+  </Suspense>
+)
+
 const editor = (
   <Suspense fallback={<LibrarySkeleton />}>
     <CardEditorPage />
@@ -38,6 +46,7 @@ export function App() {
             <Route path="ordner/:folderId" element={<FoldersPage />} />
             <Route path="stapel/:deckId" element={<DeckPage />} />
             <Route path="stapel/:deckId/neu" element={editor} />
+            <Route path="stapel/:deckId/sprache" element={voice} />
             <Route path="karte/:cardId/bearbeiten" element={editor} />
             <Route path="lernen" element={<LearnPage />} />
             <Route path="lernen/sitzung" element={session} />

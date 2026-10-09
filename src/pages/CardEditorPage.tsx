@@ -1,5 +1,5 @@
 import { motion, useAnimationControls } from 'framer-motion'
-import { ChevronDown, Eye, Save, SkipForward, Trash2 } from 'lucide-react'
+import { ChevronDown, Eye, Mic, Save, SkipForward, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ActionSheet } from '@/components/ActionSheet'
@@ -153,9 +153,20 @@ function CardEditor({ deck, card }: { deck: Deck; card?: Card }) {
               {savedCount > 0 && <span className="ml-1 font-semibold text-success">· {savedCount} gespeichert</span>}
             </p>
           </div>
-          <button onClick={() => setPreview(true)} className="flex min-h-11 items-center gap-1 px-2 text-[16px] text-accent" aria-label="Vorschau">
-            <Eye size={20} />
-          </button>
+          <div className="flex items-center">
+            {!isEdit && (
+              <button
+                onClick={() => navigate(`/stapel/${deck.id}/sprache`, { replace: true })}
+                className="flex size-11 items-center justify-center text-accent"
+                aria-label="Per Sprache erstellen"
+              >
+                <Mic size={20} />
+              </button>
+            )}
+            <button onClick={() => setPreview(true)} className="flex size-11 items-center justify-center text-accent" aria-label="Vorschau">
+              <Eye size={20} />
+            </button>
+          </div>
         </div>
       </header>
 

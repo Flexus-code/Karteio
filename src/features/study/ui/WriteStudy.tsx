@@ -19,6 +19,8 @@ export function WriteStudy() {
 
 function WriteCard({ item, card }: { item: SessionItem; card: Card }) {
   const [checked, setChecked] = useState<{ result: CheckResult; input: string } | null>(null)
+  /** Lösung ohne Eingabe aufgedeckt → selbst bewerten */
+  const [revealed, setRevealed] = useState(false)
   const variant = { reverse: item.reverse, cloze: item.cloze }
   const expected = expectedAnswer(card, variant)
 
@@ -34,15 +36,25 @@ function WriteCard({ item, card }: { item: SessionItem; card: Card }) {
           <CardFace card={card} side="front" variant={variant} />
         </motion.div>
 
-        <AnswerInput expected={expected} checked={checked} autoFocus onChecked={(result, input) => setChecked({ result, input })} />
+        {!revealed && <AnswerInput expected={expected} checked={checked} autoFocus onChecked={(result, input) => setChecked({ result, input })} onReveal={() => setRevealed(true)} />}
 
-        {checked && (
+        {(checked || revealed) && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-[28px] border border-line bg-surface p-6 shadow-soft">
             <CardFace card={card} side="back" variant={variant} />
           </motion.div>
         )}
       </div>
 
+      {revealed && (
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 gap-2.5 px-5 pb-[calc(var(--safe-bottom)+14px)] pt-2">
+          <Button variant="danger" onClick={() => void answer(1, false)}>
+            Nicht gewusst
+          </Button>
+          <Button variant="success" onClick={() => void answer(3, true)}>
+            Gewusst
+          </Button>
+        </motion.div>
+      )}
       {checked && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2.5 px-5 pb-[calc(var(--safe-bottom)+14px)] pt-2">
           {checked.result === 'wrong' && (

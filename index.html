@@ -18,11 +18,13 @@
     <script>
       // Theme vor dem ersten Rendern setzen (kein Aufblitzen)
       try {
-        var s = JSON.parse(localStorage.getItem('karteio-ui') || '{}').state || {};
+        var raw = JSON.parse(localStorage.getItem('karteio-ui') || '{}');
+        var s = raw.state || {};
+        if (!raw.version && s.accent === 'indigo') s.accent = 'green';
         var t = s.theme || 'system';
         var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.classList.toggle('dark', dark);
-        document.documentElement.dataset.accent = s.accent || 'indigo';
+        document.documentElement.dataset.accent = s.accent || 'green';
       } catch (e) {}
     </script>
   </head>

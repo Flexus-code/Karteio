@@ -44,6 +44,8 @@ function SwipeCard({ item, card, state, remaining }: SwipeCardProps) {
   const [hint, setHint] = useState(false)
   const [checked, setChecked] = useState<{ result: CheckResult; input: string } | null>(null)
   const [choiceCorrect, setChoiceCorrect] = useState<boolean | null>(null)
+  /** Lösung ohne Eingabe aufgedeckt */
+  const [revealed, setRevealed] = useState(false)
   const [canSwipeUp, setCanSwipeUp] = useState(true)
   const flying = useRef(false)
   const areaRef = useRef<HTMLDivElement>(null)
@@ -59,7 +61,7 @@ function SwipeCard({ item, card, state, remaining }: SwipeCardProps) {
   const needsInput = card.type === 'input' && !item.reverse
   const isChoice = card.type === 'choice'
   const interactive = needsInput || isChoice
-  const answeredInteractive = needsInput ? checked !== null : isChoice ? choiceCorrect !== null : true
+  const answeredInteractive = needsInput ? checked !== null || revealed : isChoice ? choiceCorrect !== null : true
 
   const intervals = useMemo(
     () => (mode === 'srs' && state ? previewIntervals(createScheduler(retention), state) : null),
@@ -89,8 +91,8 @@ function SwipeCard({ item, card, state, remaining }: SwipeCardProps) {
       animate(x, r.fly.x * w * 1.2, { duration: 0.32, ease: [0.4, 0, 1, 1] }),
       animate(y, r.fly.y * 700, { duration: 0.32, ease: [0.4, 0, 1, 1] }),
     ])
-    const correct = needsInput && checked ? checked.result !== 'wrong' : isChoice && choiceCorrect !== null ? choiceCorrect : rating >= 3
-    await answer(rating, correct)
+    // Deine Bewertung zählt: „Gewusst“/„Gut“ ist richtig, auch wenn du nichts eingetippt hast
+    await answer(rating, rating >= 3)
   }
 
   const onDragEnd = (_: unknown, info: PanInfo) => {
@@ -183,12 +185,16 @@ function SwipeCard({ item, card, state, remaining }: SwipeCardProps) {
             />
           </div>
         )}
-        {needsInput && (
+        {needsInput && !(revealed && !checked) && (
           <div className="mt-4">
             <AnswerInput
               expected={expectedAnswer(card, variant)}
               checked={checked}
               autoFocus
+              onReveal={() => {
+                setRevealed(true)
+                setFlipped(true)
+              }}
               onChecked={(result, input) => {
                 setChecked({ result, input })
                 setTimeout(() => setFlipped(true), 400)

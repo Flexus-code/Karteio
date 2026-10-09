@@ -9,6 +9,7 @@ import {
   Highlighter,
   ImagePlus,
   Italic,
+  Mic,
   List,
   ListOrdered,
   Palette,
@@ -21,10 +22,11 @@ import {
   Undo2,
   type LucideIcon,
 } from 'lucide-react'
-import { useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { toast } from '@/store/toast'
 import { nextClozeNumber } from '../cloze'
 import { saveImage } from '../media'
+import { useSpeech } from '@/features/voice/useSpeech'
 
 const TEXT_COLORS = [
   { label: 'Standard', value: null, swatch: 'var(--text)' },
@@ -71,6 +73,17 @@ export function Toolbar({ editor, cloze }: ToolbarProps) {
 
   const chain = () => editor.chain().focus()
 
+  const speech = useSpeech({
+    onFinal: (text) => {
+      // Leerzeichen davor, wenn direkt an Text angehängt wird
+      const before = editor.state.doc.textBetween(Math.max(0, editor.state.selection.from - 1), editor.state.selection.from)
+      chain().insertContent((before && before !== ' ' ? ' ' : '') + text).run()
+    },
+  })
+  useEffect(() => {
+    if (speech.error) toast(speech.error, { tone: 'danger' })
+  }, [speech.error])
+
   const insertCloze = () => {
     const n = nextClozeNumber(editor.getText())
     const { from, to, empty } = editor.state.selection
@@ -106,6 +119,17 @@ export function Toolbar({ editor, cloze }: ToolbarProps) {
             className="mr-1 flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-accent px-3 text-[13px] font-semibold text-white"
           >
             <Brackets size={16} /> Lücke
+          </button>
+        )}
+        {speech.supported && (
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => (speech.listening ? speech.stop() : speech.start())}
+            aria-label={speech.listening ? 'Diktat beenden' : 'Diktieren'}
+            className={`mr-1 flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3 text-[13px] font-semibold ${speech.listening ? 'animate-pulse bg-danger text-white' : 'bg-accent-soft text-accent'}`}
+          >
+            <Mic size={16} /> {speech.listening ? 'Stopp' : 'Diktieren'}
           </button>
         )}
         <Tool icon={Bold} label="Fett" active={s.bold} onClick={() => chain().toggleBold().run()} />
