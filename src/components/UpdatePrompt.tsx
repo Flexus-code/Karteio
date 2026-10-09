@@ -1,22 +1,40 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { RefreshCw, X } from 'lucide-react'
+import { useCallback, useEffect } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
+import { useUpdateStore } from '@/store/update'
 
-/** Zeigt einen Hinweis, sobald eine neue App-Version bereitsteht. */
+/** Registriert den Service Worker und zeigt einen Hinweis, sobald eine neue App-Version bereitsteht. */
 export function UpdatePrompt() {
   const {
-    needRefresh: [needRefresh, setNeedRefresh],
+    needRefresh: [needRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(_url, registration) {
-      // Stündlich nach Updates suchen, solange die App offen ist
-      if (registration) setInterval(() => void registration.update(), 60 * 60 * 1000)
+      if (!registration) return
+      useUpdateStore.setState({ registration })
+      // Stündlich und beim Zurückkehren in die App nach Updates suchen
+      setInterval(() => void registration.update().catch(() => undefined), 60 * 60 * 1000)
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') void registration.update().catch(() => undefined)
+      })
     },
   })
+  const dismissed = useUpdateStore((s) => s.dismissed)
+
+  /** Neue Version aktivieren und neu laden – mit Rückfall, falls das Signal des Service Workers ausbleibt */
+  const apply = useCallback(async () => {
+    setTimeout(() => location.reload(), 2500)
+    await updateServiceWorker(true)
+  }, [updateServiceWorker])
+
+  useEffect(() => {
+    useUpdateStore.setState({ needRefresh, apply })
+  }, [needRefresh, apply])
 
   return (
     <AnimatePresence>
-      {needRefresh && (
+      {needRefresh && !dismissed && (
         <motion.div
           role="status"
           initial={{ opacity: 0, y: -24, scale: 0.96 }}
@@ -32,14 +50,11 @@ export function UpdatePrompt() {
             <p className="text-[14px] font-semibold">Neue Version verfügbar</p>
             <p className="text-[12.5px] text-ink-2">Tippe auf Aktualisieren.</p>
           </div>
-          <button
-            onClick={() => void updateServiceWorker(true)}
-            className="rounded-xl bg-accent px-3 py-2 text-[13px] font-semibold text-white"
-          >
+          <button onClick={() => void apply()} className="rounded-xl bg-accent px-3 py-2 text-[13px] font-semibold text-white">
             Aktualisieren
           </button>
           <button
-            onClick={() => setNeedRefresh(false)}
+            onClick={() => useUpdateStore.setState({ dismissed: true })}
             aria-label="Hinweis schließen"
             className="flex size-9 items-center justify-center rounded-xl text-ink-3"
           >

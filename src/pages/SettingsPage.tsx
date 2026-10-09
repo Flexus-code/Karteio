@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
-import { BookOpen, Check, ChevronRight, Database, GraduationCap, HardDrive, Info, Palette, ShieldCheck } from 'lucide-react'
+import { Smartphone, BookOpen, Check, ChevronRight, Database, GraduationCap, HardDrive, Info, Palette, ShieldCheck } from 'lucide-react'
 import { DataSection } from '@/features/data/DataSection'
+import { UpdateCard } from '@/features/settings/UpdateCard'
 import { Stepper } from '@/components/Stepper'
 import { Switch } from '@/components/Switch'
 import { ExamCountdown } from '@/features/stats/ExamCountdown'
@@ -35,6 +36,10 @@ export function SettingsPage() {
     <>
       <PageHeader title="Einstellungen" />
       <div className="space-y-6 px-5">
+        <Section icon={Smartphone} title="App">
+          <UpdateCard />
+        </Section>
+
         <Section icon={Palette} title="Darstellung">
           <Card className="space-y-5 p-4">
             <div>
@@ -130,7 +135,6 @@ export function SettingsPage() {
               <span className="flex-1">Kurzanleitung anzeigen</span>
               <ChevronRight size={18} className="text-ink-3" />
             </button>
-            <Row label="Version">{__APP_VERSION__}</Row>
             <Row label="Entwickelt von">Felix Böse</Row>
             <Row label="Daten">Lokal, offline</Row>
           </Card>

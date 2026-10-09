@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import type { ItemColor } from '@/db/types'
 import { colorGradient } from '@/lib/colors'
 
@@ -6,15 +5,14 @@ interface ItemIconProps {
   icon: string
   color: ItemColor
   size?: number
-  layoutId?: string
   /** Stapel bekommen eine Karten-Optik mit versetzter Rückseite */
   variant?: 'folder' | 'deck'
 }
 
-export function ItemIcon({ icon, color, size = 48, layoutId, variant = 'folder' }: ItemIconProps) {
+export function ItemIcon({ icon, color, size = 48, variant = 'folder' }: ItemIconProps) {
   const radius = Math.round(size * 0.3)
   return (
-    <motion.div layoutId={layoutId} className="relative shrink-0" style={{ width: size, height: size }}>
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
       {variant === 'deck' && (
         <div
           className="absolute inset-0 translate-x-[3px] -translate-y-[3px] rotate-6 opacity-40"
@@ -29,6 +27,6 @@ export function ItemIcon({ icon, color, size = 48, layoutId, variant = 'folder' 
           {icon}
         </span>
       </div>
-    </motion.div>
+    </div>
   )
 }

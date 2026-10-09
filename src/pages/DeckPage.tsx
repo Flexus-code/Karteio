@@ -88,7 +88,7 @@ export function DeckPage() {
           </button>
         </div>
         <div className="flex items-center gap-4">
-          <ItemIcon icon={deck.icon} color={deck.color} size={64} variant="deck" layoutId={`icon-${deck.id}`} />
+          <ItemIcon icon={deck.icon} color={deck.color} size={64} variant="deck" />
           <div className="min-w-0">
             <h1 className="font-display text-[28px] font-bold leading-tight tracking-tight [overflow-wrap:anywhere]">{deck.name}</h1>
             {deck.description && <p className="text-[14px] text-ink-2">{deck.description}</p>}

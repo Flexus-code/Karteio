@@ -148,7 +148,6 @@ export function LibraryView({ library, folderId }: LibraryViewProps) {
                 renderItem={(f, controls) => (
                   <ItemRow
                     kind="folder"
-                    id={f.id}
                     name={f.name}
                     icon={f.icon}
                     color={f.color}
@@ -175,7 +174,6 @@ export function LibraryView({ library, folderId }: LibraryViewProps) {
                   return (
                     <ItemRow
                       kind="deck"
-                      id={d.id}
                       name={d.name}
                       icon={d.icon}
                       color={d.color}
@@ -275,7 +273,7 @@ function FolderHeader({ library, folder, stats, onBack, onMenu, actions }: Folde
       </nav>
 
       <div className="flex items-center gap-4">
-        <ItemIcon icon={folder.icon} color={folder.color} size={64} layoutId={`icon-${folder.id}`} />
+        <ItemIcon icon={folder.icon} color={folder.color} size={64} />
         <div className="min-w-0">
           <h1 className="font-display text-[28px] font-bold leading-tight tracking-tight [overflow-wrap:anywhere]">{folder.name}</h1>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[13.5px] text-ink-2">

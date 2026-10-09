@@ -8,7 +8,10 @@ import { fileURLToPath, URL } from 'node:url'
 export default defineConfig({
   // Relative Basis, damit die App unter jedem GitHub-Pages-Pfad läuft (HashRouter)
   base: './',
-  define: { __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.0.0') },
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.0.0'),
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
@@ -39,6 +42,8 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: 'index.html',
+        // Neue Seiten sofort vom Service Worker steuern lassen (sonst greift das Update erst nach einem Neustart)
+        clientsClaim: true,
         // Startbilder lädt iOS selbst – nicht in den Offline-Cache
         globIgnores: ['**/apple-splash-*.png'],
       },

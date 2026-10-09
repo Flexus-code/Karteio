@@ -7,7 +7,6 @@ import type { ItemStats } from './tree'
 
 interface ItemRowProps {
   kind: 'folder' | 'deck'
-  id: string
   name: string
   icon: string
   color: ItemColor
@@ -19,7 +18,7 @@ interface ItemRowProps {
   onMenu: () => void
 }
 
-export function ItemRow({ kind, id, name, icon, color, subtitle, stats, sorting, dragControls, onOpen, onMenu }: ItemRowProps) {
+export function ItemRow({ kind, name, icon, color, subtitle, stats, sorting, dragControls, onOpen, onMenu }: ItemRowProps) {
   const { handlers, wasLongPress } = useLongPress(onMenu)
   const percent = Math.round(stats.progress * 100)
 
@@ -37,7 +36,7 @@ export function ItemRow({ kind, id, name, icon, color, subtitle, stats, sorting,
         className="flex min-w-0 flex-1 items-center gap-3.5 text-left"
         aria-label={`${kind === 'folder' ? 'Ordner' : 'Stapel'} ${name} öffnen`}
       >
-        <ItemIcon icon={icon} color={color} variant={kind} layoutId={sorting ? undefined : `icon-${id}`} />
+        <ItemIcon icon={icon} color={color} variant={kind} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <p className="truncate text-[16px] font-semibold tracking-tight">{name}</p>
