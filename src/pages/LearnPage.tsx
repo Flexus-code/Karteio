@@ -15,11 +15,11 @@ import { startSession } from '@/features/study/session'
 import { toast } from '@/store/toast'
 
 const MODES: { mode: StudyMode; icon: LucideIcon; tint: string }[] = [
-  { mode: 'srs', icon: Brain, tint: 'from-indigo-500 to-violet-600' },
-  { mode: 'free', icon: Shuffle, tint: 'from-sky-500 to-blue-600' },
-  { mode: 'write', icon: Keyboard, tint: 'from-emerald-500 to-teal-600' },
-  { mode: 'quiz', icon: CheckSquare, tint: 'from-amber-500 to-orange-600' },
-  { mode: 'exam', icon: Timer, tint: 'from-rose-500 to-pink-600' },
+  { mode: 'srs', icon: Brain, tint: 'accent-gradient' },
+  { mode: 'free', icon: Shuffle, tint: 'bg-gradient-to-br from-sky-500 to-blue-600' },
+  { mode: 'write', icon: Keyboard, tint: 'bg-gradient-to-br from-emerald-500 to-teal-600' },
+  { mode: 'quiz', icon: CheckSquare, tint: 'bg-gradient-to-br from-amber-500 to-orange-600' },
+  { mode: 'exam', icon: Timer, tint: 'bg-gradient-to-br from-rose-500 to-pink-600' },
 ]
 
 export function LearnPage() {
@@ -92,7 +92,7 @@ export function LearnPage() {
                 className={mode === 'srs' ? 'col-span-2' : ''}
               >
                 <Pressable onClick={() => open(mode)} className="flex h-full w-full flex-col items-start gap-2.5 rounded-[22px] border border-line bg-surface p-4 text-left shadow-soft">
-                  <span className={`flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-[0_6px_14px_-6px_rgb(0_0_0/0.4)] ${tint}`}>
+                  <span className={`flex size-11 items-center justify-center rounded-2xl text-white shadow-[0_6px_14px_-6px_rgb(0_0_0/0.4)] ${tint}`}>
                     <Icon size={22} />
                   </span>
                   <span>
