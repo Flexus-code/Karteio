@@ -68,7 +68,7 @@ function reviveState(s: CardState): CardState {
 
 // ---------- Vollständiges Backup ----------
 
-/** Einstellungen ohne Funktionen und ohne geheime Werte (z. B. API-Schlüssel) */
+/** Einstellungen ohne Funktionen und ohne geheime Werte */
 function exportableSettings(): Partial<LearningSettings> {
   const entries = Object.entries(useSettings.getState()).filter(([k, v]) => typeof v !== 'function' && !/key|secret|token/i.test(k))
   return Object.fromEntries(entries) as Partial<LearningSettings>

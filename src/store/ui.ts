@@ -5,13 +5,13 @@ export type ThemeMode = 'system' | 'light' | 'dark'
 export type AccentColor = 'green' | 'indigo' | 'violet' | 'blue' | 'teal' | 'rose' | 'amber'
 
 export const ACCENTS: { id: AccentColor; label: string; color: string }[] = [
-  { id: 'green', label: 'Grün', color: '#16a34a' },
+  { id: 'green', label: 'Grün', color: '#15803d' },
   { id: 'indigo', label: 'Indigo', color: '#4f46e5' },
   { id: 'violet', label: 'Violett', color: '#7c3aed' },
   { id: 'blue', label: 'Blau', color: '#2563eb' },
-  { id: 'teal', label: 'Türkis', color: '#0d9488' },
+  { id: 'teal', label: 'Türkis', color: '#0f766e' },
   { id: 'rose', label: 'Rosé', color: '#e11d48' },
-  { id: 'amber', label: 'Bernstein', color: '#d97706' },
+  { id: 'amber', label: 'Bernstein', color: '#b45309' },
 ]
 
 interface UiState {

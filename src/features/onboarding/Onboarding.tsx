@@ -52,7 +52,7 @@ const SLIDES: Slide[] = [
   {
     title: 'Offline & privat',
     text: 'Alles bleibt auf deinem Handy und funktioniert auch ohne Internet.',
-    tips: ['Erstelle regelmäßig ein Backup, damit nichts verloren geht.', 'Optional hilft dir Claude (KI) beim Erstellen von Karten.'],
+    tips: ['Erstelle regelmäßig ein Backup, damit nichts verloren geht.', 'Stapel kannst du als Datei mit Mitschülern teilen.'],
     illustration: <OfflineIllustration />,
   },
 ]

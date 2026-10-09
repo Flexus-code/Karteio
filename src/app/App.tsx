@@ -3,6 +3,7 @@ import { MotionConfig } from 'framer-motion'
 import { lazy, Suspense } from 'react'
 import { LibrarySkeleton } from '@/features/library/LibrarySkeleton'
 import { AppShell } from './AppShell'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { HomePage } from '@/pages/HomePage'
 import { FoldersPage } from '@/pages/FoldersPage'
 import { DeckPage } from '@/pages/DeckPage'
@@ -47,6 +48,7 @@ const editor = (
 
 export function App() {
   return (
+    <ErrorBoundary>
     <MotionConfig reducedMotion="user">
       <HashRouter>
         <Routes>
@@ -70,5 +72,6 @@ export function App() {
         </Routes>
       </HashRouter>
     </MotionConfig>
+    </ErrorBoundary>
   )
 }
