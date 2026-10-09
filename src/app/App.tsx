@@ -1,5 +1,7 @@
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import { MotionConfig } from 'framer-motion'
+import { lazy, Suspense } from 'react'
+import { LibrarySkeleton } from '@/features/library/LibrarySkeleton'
 import { AppShell } from './AppShell'
 import { HomePage } from '@/pages/HomePage'
 import { FoldersPage } from '@/pages/FoldersPage'
@@ -7,6 +9,15 @@ import { DeckPage } from '@/pages/DeckPage'
 import { LearnPage } from '@/pages/LearnPage'
 import { StatsPage } from '@/pages/StatsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
+
+// Der Editor (TipTap) ist groß – erst laden, wenn er gebraucht wird
+const CardEditorPage = lazy(() => import('@/pages/CardEditorPage').then((m) => ({ default: m.CardEditorPage })))
+
+const editor = (
+  <Suspense fallback={<LibrarySkeleton />}>
+    <CardEditorPage />
+  </Suspense>
+)
 
 export function App() {
   return (
@@ -18,6 +29,8 @@ export function App() {
             <Route path="ordner" element={<FoldersPage />} />
             <Route path="ordner/:folderId" element={<FoldersPage />} />
             <Route path="stapel/:deckId" element={<DeckPage />} />
+            <Route path="stapel/:deckId/neu" element={editor} />
+            <Route path="karte/:cardId/bearbeiten" element={editor} />
             <Route path="lernen" element={<LearnPage />} />
             <Route path="statistik" element={<StatsPage />} />
             <Route path="einstellungen" element={<SettingsPage />} />

@@ -35,8 +35,17 @@ export interface Deck extends Timestamps {
 
 export type CardType = 'basic' | 'reversible' | 'cloze' | 'choice' | 'input'
 
+/** Knoten eines TipTap-Dokuments */
+export interface RichTextNode {
+  type: string
+  text?: string
+  attrs?: Record<string, unknown>
+  marks?: { type: string; attrs?: Record<string, unknown> }[]
+  content?: RichTextNode[]
+}
+
 /** TipTap-Dokument (JSON) */
-export type RichText = { type: 'doc'; content?: unknown[] }
+export type RichText = { type: 'doc'; content?: RichTextNode[] }
 
 export interface Choice {
   id: Id
