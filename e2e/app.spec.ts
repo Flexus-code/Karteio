@@ -122,3 +122,48 @@ test('Startbildschirm bleibt nach dem Wegtippen weg', async ({ page }) => {
   await expect(splash).toHaveCount(0)
   await expect(page.getByRole('dialog', { name: 'Kurzanleitung' })).toBeVisible()
 })
+
+test('Nicht gewusste Karten kommen erst am Ende als eigene Runde', async ({ page }) => {
+  await page.goto('#/ordner')
+  await skipIntro(page)
+  await loadSample(page)
+  await page.goto('#/lernen')
+  await page.getByRole('button', { name: /Jetzt lernen/ }).click()
+  await expect(page).toHaveURL(/sitzung/)
+
+  // Herkunft der Karte ist sichtbar
+  await expect(page.getByLabel(/^Aus: Beispiel: IHK-Prüfung › /)).toBeVisible()
+
+  const counter = page.locator('header .tabular-nums')
+  const total = Number((await counter.textContent())!.split('/')[1]!.trim())
+  const done = page.getByText('Lerneinheit abgeschlossen')
+  const show = page.getByRole('button', { name: 'Antwort zeigen', exact: true })
+  const input = page.getByLabel('Deine Antwort')
+  const choose = page.getByText('Wähle deine Antwort')
+
+  let answered = 0
+  while (!(await done.isVisible())) {
+    await expect(done.or(show).or(input).or(choose).first()).toBeVisible()
+    if (await done.isVisible()) break
+    // Die Gesamtzahl darf sich nie erhöhen (keine sofortige Wiederholung)
+    expect((await counter.textContent())!).toContain(`/ ${total}`)
+    if (await show.isVisible()) await show.click()
+    else if (await input.isVisible()) await input.press('Enter')
+    else if (await choose.isVisible()) {
+      await page.locator('button.border-2').first().click()
+      const check = page.getByRole('button', { name: 'Prüfen' })
+      if (await check.isVisible()) await check.click()
+    }
+    // Erste Karte: nicht gewusst, alle anderen: einfach
+    const rate = page.getByRole('button', { name: answered === 0 ? /^Nochmal/ : /^Einfach/ })
+    await rate.waitFor({ state: 'visible', timeout: 5000 })
+    await rate.click()
+    answered++
+    await page.waitForTimeout(150)
+  }
+  expect(answered).toBe(total)
+
+  await page.getByRole('button', { name: '1 nicht gewusste Karte wiederholen' }).click()
+  await expect(page.getByText('Wiederholung · Runde 1')).toBeVisible()
+  await expect(counter).toHaveText('1 / 1')
+})

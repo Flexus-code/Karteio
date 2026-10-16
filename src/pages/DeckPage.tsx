@@ -12,6 +12,7 @@ import { db } from '@/db/db'
 import { cardPreviewText, CardRow } from '@/features/cards/CardRow'
 import { useCardActions } from '@/features/cards/useCardActions'
 import { ItemIcon } from '@/features/library/ItemIcon'
+import { DeckPath } from '@/features/library/DeckPath'
 import { LibrarySkeleton } from '@/features/library/LibrarySkeleton'
 import { useItemDialogs } from '@/features/library/useItemDialogs'
 import { StudyButton } from '@/features/library/LibraryView'
@@ -87,6 +88,7 @@ export function DeckPage() {
             <MoreHorizontal size={22} />
           </button>
         </div>
+        <DeckPath deckId={deck.id} className="mb-3" />
         <div className="flex items-center gap-4">
           <ItemIcon icon={deck.icon} color={deck.color} size={64} variant="deck" />
           <div className="min-w-0">

@@ -8,7 +8,7 @@ import type { Deck } from '@/db/types'
 import { emptyDraft } from '@/features/cards/model'
 import { createCard } from '@/features/cards/repo'
 import { textToDoc } from '@/features/cards/richtext'
-import { ItemIcon } from '@/features/library/ItemIcon'
+import { DeckPath } from '@/features/library/DeckPath'
 import { LibrarySkeleton } from '@/features/library/LibrarySkeleton'
 import { splitQuestionAnswer, tidyTranscript, useSpeech } from '@/features/voice/useSpeech'
 import { toast } from '@/store/toast'
@@ -105,13 +105,11 @@ function VoiceCreator({ deck }: { deck: Deck }) {
           </button>
           <div className="min-w-0 text-center">
             <p className="text-[16px] font-semibold">Per Sprache</p>
-            <p className="flex items-center justify-center gap-1 truncate text-[12px] text-ink-3">
-              <ItemIcon icon={deck.icon} color={deck.color} size={14} /> {deck.name}
-              {saved > 0 && <span className="ml-1 font-semibold text-success">· {saved} gespeichert</span>}
-            </p>
+            {saved > 0 && <p className="text-[12px] font-semibold text-success">{saved} gespeichert</p>}
           </div>
           <span className="w-[72px]" />
         </div>
+        <DeckPath deckId={deck.id} className="justify-center px-4 pb-2" />
       </header>
 
       <div className="flex-1 space-y-3 px-5 pt-4">

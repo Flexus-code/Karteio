@@ -22,7 +22,6 @@ interface UndoEntry {
   item: SessionItem
   before?: CardState
   reviewId: string
-  requeuedKey?: string
 }
 
 interface SessionState {
@@ -39,6 +38,8 @@ interface SessionState {
   /** Antworttexte aller Karten im Bereich (Ablenker fürs Quiz) */
   pool: string[]
   busy: boolean
+  /** 1 = normale Runde, 2+ = Wiederholung der nicht gewussten Karten */
+  round: number
 }
 
 const INITIAL: SessionState = {
@@ -53,6 +54,7 @@ const INITIAL: SessionState = {
   finished: false,
   pool: [],
   busy: false,
+  round: 1,
 }
 
 export const useSession = create<SessionState>()(() => INITIAL)
@@ -98,7 +100,7 @@ export async function buildItems(config: StudyConfig): Promise<{ items: SessionI
 }
 
 /** Startet eine Sitzung. Mit `explicitItems` (z. B. „Fehler nochmal lernen“) wird die Auswahl übersprungen. */
-export async function startSession(config: StudyConfig, explicitItems?: SessionItem[]): Promise<number> {
+export async function startSession(config: StudyConfig, explicitItems?: SessionItem[], round = 1): Promise<number> {
   const built = await buildItems(config)
   const items = explicitItems ?? built.items
   const now = Date.now()
@@ -107,6 +109,7 @@ export async function startSession(config: StudyConfig, explicitItems?: SessionI
     config,
     queue: items,
     pool: built.pool,
+    round,
     startedAt: now,
     shownAt: now,
     endsAt: config.mode === 'exam' ? now + config.examMinutes * 60_000 : null,
@@ -148,23 +151,15 @@ export async function answer(rating: Rating, correct = rating >= 3) {
     }
     await db.reviews.add(review)
 
-    // Nochmal-Karten kommen in derselben Sitzung wieder dran
-    let queue = s.queue
-    let requeuedKey: string | undefined
-    const relearnSoon = mode === 'srs' && after && new Date(after.due).getTime() - now.getTime() < 20 * 60_000
-    const repeatFree = mode === 'free' && rating === 1
-    if (relearnSoon || repeatFree) {
-      requeuedKey = `${item.stateId}#r${now.getTime()}`
-      const insertAt = Math.min(queue.length, s.position + 4)
-      queue = [...queue.slice(0, insertAt), { ...item, key: requeuedKey }, ...queue.slice(insertAt)]
-    }
-
+    // Nicht gewusste Karten kommen NICHT sofort wieder – sie werden am Ende
+    // als eigene Runde angeboten („Nicht gewusste wiederholen“ in der Zusammenfassung).
+    const queue = s.queue
     const position = s.position + 1
     useSession.setState({
       queue,
       position,
       results: [...s.results, { key: item.key, stateId: item.stateId, cardId: item.cardId, rating, correct, durationMs }],
-      undo: [...s.undo, { item, before: mode === 'srs' ? before : undefined, reviewId: review.id, requeuedKey }],
+      undo: [...s.undo, { item, before: mode === 'srs' ? before : undefined, reviewId: review.id }],
       shownAt: Date.now(),
       finished: position >= queue.length,
     })
@@ -182,9 +177,7 @@ export async function undoLast() {
   try {
     if (last.before) await db.cardStates.put(last.before)
     await db.reviews.delete(last.reviewId)
-    const queue = last.requeuedKey ? s.queue.filter((q) => q.key !== last.requeuedKey) : s.queue
     useSession.setState({
-      queue,
       position: Math.max(0, s.position - 1),
       results: s.results.slice(0, -1),
       undo: s.undo.slice(0, -1),

@@ -10,6 +10,7 @@ import { ProgressRing } from '@/components/ProgressRing'
 import { db } from '@/db/db'
 import { cardPreviewText } from '@/features/cards/CardRow'
 import { ihkGrade } from '../answer'
+import { DeckPath } from '@/features/library/DeckPath'
 import { saveExamResult } from '@/features/stats/useStatsData'
 import { resetSession, startSession, useSession } from '../session'
 
@@ -22,7 +23,7 @@ function formatDuration(ms: number) {
 
 export function SessionSummary() {
   const navigate = useNavigate()
-  const { config, results, queue, startedAt } = useSession()
+  const { config, results, queue, startedAt, round } = useSession()
   const [elapsed] = useState(() => Date.now() - startedAt)
   const mode = config?.mode ?? 'srs'
   const isExam = mode === 'exam'
@@ -58,7 +59,7 @@ export function SessionSummary() {
       spread: strong ? 90 : 60,
       origin: { y: 0.35 },
       disableForReducedMotion: true,
-      colors: ['#4f46e5', '#7c3aed', '#16a34a', '#f59e0b', '#e11d48'],
+      colors: ['#15803d', '#0f766e', '#22c55e', '#f59e0b', '#e11d48'],
     })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -69,13 +70,20 @@ export function SessionSummary() {
 
   const retry = async () => {
     if (!config) return
-    const n = await startSession({ ...config, mode: mode === 'srs' || mode === 'exam' ? 'free' : mode }, wrongItems.map((w, i) => ({ ...w, key: `${w.stateId}#retry${i}` })))
+    // Wiederholungsrunden ändern den Lernplan nicht mehr (die Bewertung „Nochmal“ ist schon gespeichert)
+    const n = await startSession(
+      { ...config, mode: mode === 'srs' || mode === 'exam' ? 'free' : mode },
+      wrongItems.map((w, i) => ({ ...w, key: `${w.stateId}#r${round + 1}-${i}` })),
+      round + 1,
+    )
     if (n === 0) close()
   }
 
   const message = isExam
     ? `Note ${grade.grade} – ${grade.label}`
-    : percent >= 90
+    : round > 1 && wrongItems.length === 0
+      ? 'Jetzt sitzen alle!'
+      : percent >= 90
       ? 'Hervorragend!'
       : percent >= 70
         ? 'Stark gemacht!'
@@ -104,7 +112,9 @@ export function SessionSummary() {
         <h1 className="mt-5 flex items-center gap-2 font-display text-[26px] font-bold tracking-tight">
           {message} {!isExam && <PartyPopper size={24} className="text-warning" />}
         </h1>
-        <p className="mt-1 text-[14.5px] text-ink-2">{isExam ? `${correct} von ${total} Fragen richtig` : 'Lerneinheit abgeschlossen'}</p>
+        <p className="mt-1 text-[14.5px] text-ink-2">
+          {isExam ? `${correct} von ${total} Fragen richtig` : round > 1 ? `Wiederholungsrunde ${round - 1} abgeschlossen` : 'Lerneinheit abgeschlossen'}
+        </p>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="mt-6 grid grid-cols-3 gap-3">
@@ -113,31 +123,32 @@ export function SessionSummary() {
         <Tile icon={Clock} value={formatDuration(elapsed)} label="Zeit" />
       </motion.div>
 
-      {wrongItems.length > 0 && (
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="mt-6">
-          <h2 className="mb-2.5 flex items-center gap-1.5 px-1 text-[13px] font-semibold uppercase tracking-wide text-ink-3">
-            <Target size={14} /> Noch üben ({wrongItems.length})
-          </h2>
-          <Card className="divide-y divide-line">
-            {(wrongCards ?? []).filter(Boolean).slice(0, 8).map((c) => (
-              <p key={c!.id} className="line-clamp-2 px-4 py-3 text-[14.5px]">
-                {cardPreviewText(c!).front}
-              </p>
-            ))}
-          </Card>
-        </motion.section>
-      )}
-
-      <div className="mt-7 space-y-2.5">
+      <div className="mt-6 space-y-2.5">
         {wrongItems.length > 0 && (
           <Button block onClick={() => void retry()}>
-            <RotateCcw size={18} /> Fehler nochmal lernen
+            <RotateCcw size={18} /> {wrongItems.length === 1 ? '1 nicht gewusste Karte wiederholen' : `${wrongItems.length} nicht gewusste Karten wiederholen`}
           </Button>
         )}
         <Button block variant={wrongItems.length > 0 ? 'secondary' : 'primary'} onClick={close}>
           Fertig
         </Button>
       </div>
+
+      {wrongItems.length > 0 && (
+        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="mt-7">
+          <h2 className="mb-2.5 flex items-center gap-1.5 px-1 text-[13px] font-semibold uppercase tracking-wide text-ink-3">
+            <Target size={14} /> Nicht gewusst ({wrongItems.length})
+          </h2>
+          <Card className="divide-y divide-line">
+            {(wrongCards ?? []).filter(Boolean).map((c) => (
+              <div key={c!.id} className="px-4 py-3">
+                <DeckPath deckId={c!.deckId} className="mb-0.5 !text-[11.5px]" />
+                <p className="line-clamp-2 text-[14.5px]">{cardPreviewText(c!).front}</p>
+              </div>
+            ))}
+          </Card>
+        </motion.section>
+      )}
     </div>
   )
 }

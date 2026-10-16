@@ -13,12 +13,13 @@ import { QuizStudy } from '@/features/study/ui/QuizStudy'
 import { SessionSummary } from '@/features/study/ui/SessionSummary'
 import { SwipeStudy } from '@/features/study/ui/SwipeStudy'
 import { useCurrent } from '@/features/study/ui/useCurrent'
+import { DeckPath } from '@/features/library/DeckPath'
 import { WriteStudy } from '@/features/study/ui/WriteStudy'
 import { toast } from '@/store/toast'
 
 export function StudySessionPage() {
   const navigate = useNavigate()
-  const { config, queue, position, results, finished, undo, endsAt } = useSession()
+  const { config, queue, position, results, finished, undo, endsAt, round } = useSession()
   const { card } = useCurrent()
   const [confirmClose, setConfirmClose] = useState(false)
   const [menu, setMenu] = useState(false)
@@ -76,7 +77,7 @@ export function StudySessionPage() {
           </button>
           <div className="min-w-0 flex-1 px-1">
             <div className="mb-1 flex items-center justify-between text-[12.5px] font-medium text-ink-2">
-              <span>{MODE_INFO[mode].label}</span>
+              <span>{round > 1 ? `Wiederholung · Runde ${round - 1}` : MODE_INFO[mode].label}</span>
               {endsAt ? <Countdown endsAt={endsAt} /> : <span className="tabular-nums">{Math.min(position + 1, queue.length)} / {queue.length}</span>}
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-surface-2">
@@ -99,6 +100,7 @@ export function StudySessionPage() {
         </div>
       </header>
 
+      {card && <DeckPath deckId={card.deckId} className="px-5 pb-1" />}
       <Study />
 
       <ActionSheet
